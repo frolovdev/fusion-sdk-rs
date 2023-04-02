@@ -1,5 +1,5 @@
 use rand::Rng;
-use std::str::FromStr;
+use std::{str::FromStr};
 
 use ethers::{core::types::{U256}, abi::AbiEncode};
 
@@ -78,9 +78,12 @@ impl AuctionSalt {
     }
 
     pub fn build(&self) -> String {
-        let res = pad_start(&hex::encode(self.auction_start_time.to_be_bytes()), 8, '0')
-            + &pad_start(&hex::encode(self.duration.to_be_bytes()), 6, '0')
-            + &pad_start(&hex::encode(self.initial_rate_bump.to_be_bytes()), 6, '0')
+        assert_eq!(self.duration < (2 as u32).pow(24), true, "duration is too big, should be less than 2^24");
+        assert_eq!(self.initial_rate_bump < (2 as u32).pow(24), true, "initial_rate_bump is too big, should be less than 2^24");
+
+        let res = pad_start(&self.auction_start_time.encode_hex(), 8,  '0')
+            + &pad_start(&self.duration.encode_hex(), 6, '0').to_owned()
+            + &pad_start(&self.initial_rate_bump.encode_hex(), 6, '0')
             + &pad_start(&self.bank_fee.encode_hex(), 8, '0')
             + &pad_start(&self.salt.encode_hex(), 36, '0');
 
@@ -94,7 +97,7 @@ impl AuctionSalt {
 
 pub fn pad_start(s: &str, width: usize, fill: char) -> String {
     if s.len() > width {
-        return s[s.len() - width..s.len()].to_string();
+        s[s.len() - width..s.len()].to_string()
     } else {
         let pad_len = width - s.len();
         let padded: String = std::iter::repeat(fill)
@@ -104,10 +107,14 @@ pub fn pad_start(s: &str, width: usize, fill: char) -> String {
         padded
     }
 }
+
+
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
     use super::{AuctionSalt, AuctionSaltData, AuctionSaltGeneratorMock};
-    use pretty_assertions::assert_eq;
+    use pretty_assertions::{assert_eq };
     use ethers::{core::types::{U256}, abi::AbiEncode};
 
     #[test]
@@ -150,5 +157,38 @@ mod tests {
         )
     }
 
-    fn should_fail_to_create_salt_due_to_wrong_auction_start_time() {}
+    #[test]
+    #[should_panic(expected = "initial_rate_bump is too big, should be less than 2^24")]
+    fn should_fail_to_create_salt_due_to_initial_rate_bump_out_of_range() {
+        let salt = AuctionSalt::new(
+            AuctionSaltData {
+                auction_start_time: 1673548149,
+                initial_rate_bump: 16_777_215 + 1,
+                duration: 180,
+                bank_fee: U256::from(123123123),
+                salt: None,
+            },
+            Box::new(AuctionSaltGeneratorMock {}),
+        );
+
+        salt.build();
+    }
+
+
+    #[test]
+    #[should_panic(expected = "duration is too big, should be less than 2^24")]
+    fn should_fail_to_create_salt_due_to_duration_out_of_range() {
+        let salt = AuctionSalt::new(
+            AuctionSaltData {
+                auction_start_time: 1673548149,
+                initial_rate_bump: 50000,
+                duration: 16777215 + 1,
+                bank_fee: U256::from(123123123),
+                salt: None,
+            },
+            Box::new(AuctionSaltGeneratorMock {}),
+        );
+
+        salt.build();
+    }
 }
