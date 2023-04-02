@@ -1,25 +1,24 @@
 use std::str::FromStr;
 
-use ruint::aliases::*;
-use ruint::Uint;
+use ethers::core::types::{U256};
 
-pub fn time_start_mask() -> Uint<256, 4> {
+pub fn time_start_mask() -> U256 {
     U256::from_str("0xFFFFFFFF00000000000000000000000000000000000000000000000000000000").unwrap()
 }
 
-pub fn duration_mask() -> Uint<256, 4> {
+pub fn duration_mask() -> U256 {
     U256::from_str("0x00000000FFFFFF00000000000000000000000000000000000000000000000000").unwrap()
 }
 
-pub fn initial_rate_bump_mask() -> Uint<256, 4> {
+pub fn initial_rate_bump_mask() -> U256 {
     U256::from_str("0x00000000000000FFFFFF00000000000000000000000000000000000000000000").unwrap()
 }
 
-pub fn fee_mask() -> Uint<256, 4> {
+pub fn fee_mask() -> U256 {
     U256::from_str("0x00000000000000000000FFFFFFFF000000000000000000000000000000000000").unwrap()
 }
 
-pub fn salt_mask() -> Uint<256, 4> {
+pub fn salt_mask() -> U256 {
     U256::from_str("0x0000000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF").unwrap()
 }
 

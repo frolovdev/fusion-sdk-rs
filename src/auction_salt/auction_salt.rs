@@ -1,6 +1,7 @@
 use rand::Rng;
-use ruint::aliases::U256;
 use std::str::FromStr;
+
+use ethers::{core::types::{U256}, abi::AbiEncode};
 
 use super::parser::{
     constants::salt_mask,
@@ -78,10 +79,10 @@ impl AuctionSalt {
 
     pub fn build(&self) -> String {
         let res = pad_start(&hex::encode(self.auction_start_time.to_be_bytes()), 8, '0')
-          +  &pad_start(&hex::encode( self.duration.to_be_bytes()), 6, '0')
+            + &pad_start(&hex::encode(self.duration.to_be_bytes()), 6, '0')
             + &pad_start(&hex::encode(self.initial_rate_bump.to_be_bytes()), 6, '0')
-            + &pad_start(&hex::encode(self.bank_fee.to_be_bytes_vec()), 8, '0')
-            + &pad_start(&hex::encode(&self.salt.to_be_bytes_vec()), 36, '0');
+            + &pad_start(&self.bank_fee.encode_hex(), 8, '0')
+            + &pad_start(&self.salt.encode_hex(), 36, '0');
 
         assert_eq!(res.len(), 64, "Some inputs were out of allowed ranges");
 
@@ -102,13 +103,12 @@ pub fn pad_start(s: &str, width: usize, fill: char) -> String {
             .collect();
         padded
     }
-
 }
 #[cfg(test)]
 mod tests {
-    use rand::Rng;
-    use ruint::aliases::U256;
     use super::{AuctionSalt, AuctionSaltData, AuctionSaltGeneratorMock};
+    use pretty_assertions::assert_eq;
+    use ethers::{core::types::{U256}, abi::AbiEncode};
 
     #[test]
     fn should_create_salt() {
@@ -125,9 +125,9 @@ mod tests {
 
         assert_eq!(
             salt.build(),
-            "45118768841948961586167738353692277076075522015101619148498725069326976549864".to_string()
+            "45118768841948961586167738353692277076075522015101619148498725069326976549864"
+                .to_string()
         )
-
     }
 
     #[test]
@@ -145,7 +145,10 @@ mod tests {
 
         assert_eq!(
             salt.build(),
-            "45118768841948961586167741099429671146420854337050268925130474518618971309032".to_string()
+            "45118768841948961586167741099429671146420854337050268925130474518618971309032"
+                .to_string()
         )
     }
+
+    fn should_fail_to_create_salt_due_to_wrong_auction_start_time() {}
 }

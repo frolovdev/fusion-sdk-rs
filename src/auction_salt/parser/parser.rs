@@ -1,29 +1,27 @@
-use std::ops::Shr;
-use std::str::FromStr;
+use std::{str::FromStr};
 
-use ruint::aliases::*;
-use ruint::Uint;
+use ethers::core::types::{U256};
 
 use super::constants::*;
 
 pub fn get_start_time(salt: &str) -> U256 {
-    let val = (U256::from_str(salt).unwrap() & time_start_mask()).shr(&TIME_START_SHIFT);
+    let val = (U256::from_str(salt).unwrap() & time_start_mask()) >> TIME_START_SHIFT;
     val
 }
 
 pub fn get_duration(salt: &str) -> U256 {
-    let val = (U256::from_str(salt).unwrap() & duration_mask()).shr(&DURATION_SHIFT);
+    let val = (U256::from_str(salt).unwrap() & duration_mask()) >> DURATION_SHIFT;
     val
 }
 
 pub fn get_initial_rate_bump(salt: &str) -> U256 {
     let val =
-        (U256::from_str(salt).unwrap() & initial_rate_bump_mask()).shr(&INITIAL_RATE_BUMP_SHIFT);
+        (U256::from_str(salt).unwrap() & initial_rate_bump_mask()) >> INITIAL_RATE_BUMP_SHIFT;
     val
 }
 
 pub fn get_fee(salt: &str) -> U256 {
-    let val = (U256::from_str(salt).unwrap() & fee_mask()).shr(&FEE_SHIFT);
+    let val = (U256::from_str(salt).unwrap() & fee_mask()) >> FEE_SHIFT;
     val
 }
 
