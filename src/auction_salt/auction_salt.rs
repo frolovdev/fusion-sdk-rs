@@ -111,11 +111,9 @@ pub fn pad_start(s: &str, width: usize, fill: char) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
     use super::{AuctionSalt, AuctionSaltData, AuctionSaltGeneratorMock};
     use pretty_assertions::{assert_eq };
-    use ethers::{core::types::{U256}, abi::AbiEncode};
+    use ethers::{core::types::{U256}};
 
     #[test]
     fn should_create_salt() {
@@ -190,5 +188,18 @@ mod tests {
         );
 
         salt.build();
+    }
+
+    #[test]
+    fn should_decode_salt() {
+
+        let  encoded_salt =
+        "45118768841948961586167741099429671146420854337050268925130474518618971309032";
+        
+        let salt = AuctionSalt::decode(encoded_salt);
+
+        println!("tuta");
+
+        assert_eq!( salt.build(), encoded_salt.to_string());
     }
 }
