@@ -129,4 +129,23 @@ mod tests {
         )
 
     }
+
+    #[test]
+    fn should_create_salt_with_non_zero_bank_fee() {
+        let salt = AuctionSalt::new(
+            AuctionSaltData {
+                auction_start_time: 1673548149,
+                initial_rate_bump: 50000,
+                duration: 180,
+                bank_fee: U256::from(123123123),
+                salt: None,
+            },
+            Box::new(AuctionSaltGeneratorMock {}),
+        );
+
+        assert_eq!(
+            salt.build(),
+            "45118768841948961586167741099429671146420854337050268925130474518618971309032".to_string()
+        )
+    }
 }
