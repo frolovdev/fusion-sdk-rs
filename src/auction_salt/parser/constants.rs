@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use ethers::core::types::{U256};
+use ethers::core::types::U256;
 
 pub fn time_start_mask() -> U256 {
     U256::from_str("0xFFFFFFFF00000000000000000000000000000000000000000000000000000000").unwrap()

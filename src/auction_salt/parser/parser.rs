@@ -1,4 +1,4 @@
-use ethers::{core::types::{U256}};
+use ethers::core::types::U256;
 
 use super::constants::*;
 

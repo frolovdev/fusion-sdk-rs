@@ -1,11 +1,11 @@
 use rand::Rng;
-use std::{str::FromStr};
+use std::str::FromStr;
 
-use ethers::{core::types::{U256}, abi::AbiEncode};
+use ethers::{abi::AbiEncode, core::types::U256};
 
 use super::parser::{
     constants::salt_mask,
-    parser::{get_duration, get_fee, get_initial_rate_bump, get_salt, get_start_time},
+    parser::*,
 };
 
 pub struct AuctionSalt {
@@ -78,11 +78,19 @@ impl AuctionSalt {
     }
 
     pub fn build(&self) -> String {
-        assert_eq!(self.duration < (2 as u32).pow(24), true, "duration is too big, should be less than 2^24");
-        assert_eq!(self.initial_rate_bump < (2 as u32).pow(24), true, "initial_rate_bump is too big, should be less than 2^24");
+        assert_eq!(
+            self.duration < (2 as u32).pow(24),
+            true,
+            "duration is too big, should be less than 2^24"
+        );
+        assert_eq!(
+            self.initial_rate_bump < (2 as u32).pow(24),
+            true,
+            "initial_rate_bump is too big, should be less than 2^24"
+        );
 
-        let res = pad_start(&self.auction_start_time.encode_hex(), 8,  '0')
-            + &pad_start(&self.duration.encode_hex(), 6, '0').to_owned()
+        let res = pad_start(&self.auction_start_time.encode_hex(), 8, '0')
+            + &pad_start(&self.duration.encode_hex(), 6, '0')
             + &pad_start(&self.initial_rate_bump.encode_hex(), 6, '0')
             + &pad_start(&self.bank_fee.encode_hex(), 8, '0')
             + &pad_start(&self.salt.encode_hex(), 36, '0');
@@ -108,12 +116,11 @@ pub fn pad_start(s: &str, width: usize, fill: char) -> String {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::{AuctionSalt, AuctionSaltData, AuctionSaltGeneratorMock};
-    use pretty_assertions::{assert_eq };
-    use ethers::{core::types::{U256}};
+    use ethers::core::types::U256;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn should_create_salt() {
@@ -172,7 +179,6 @@ mod tests {
         salt.build();
     }
 
-
     #[test]
     #[should_panic(expected = "duration is too big, should be less than 2^24")]
     fn should_fail_to_create_salt_due_to_duration_out_of_range() {
@@ -192,14 +198,13 @@ mod tests {
 
     #[test]
     fn should_decode_salt() {
+        let encoded_salt =
+            "45118768841948961586167741099429671146420854337050268925130474518618971309032";
 
-        let  encoded_salt =
-        "45118768841948961586167741099429671146420854337050268925130474518618971309032";
-        
         let salt = AuctionSalt::decode(encoded_salt);
 
         println!("tuta");
 
-        assert_eq!( salt.build(), encoded_salt.to_string());
+        assert_eq!(salt.build(), encoded_salt.to_string());
     }
 }
