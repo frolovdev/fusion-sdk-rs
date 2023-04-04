@@ -5,23 +5,10 @@ use ethers::{abi::AbiEncode, core::types::U256};
 
 use crate::utils::PadStart;
 
-use super::parser::{constants::salt_mask, parser::*};
-
-pub struct AuctionSalt {
-    pub auction_start_time: u32,
-    pub initial_rate_bump: u32,
-    pub duration: u32,
-    pub bank_fee: U256,
-    pub salt: U256,
-}
-
-pub struct AuctionSaltData {
-    auction_start_time: u32,
-    initial_rate_bump: u32,
-    duration: u32,
-    bank_fee: U256,
-    salt: Option<U256>,
-}
+use super::{
+    parser::{constants::salt_mask, parser::*},
+    types::{AuctionSalt, AuctionSaltData},
+};
 
 trait AuctionSaltGeneratorTrait {
     fn generate(&self) -> U256;
@@ -106,7 +93,9 @@ impl AuctionSalt {
 
 #[cfg(test)]
 mod tests {
-    use super::{AuctionSalt, AuctionSaltData, AuctionSaltGeneratorMock};
+    use crate::auction_salt::types::AuctionSalt;
+
+    use super::{AuctionSaltData, AuctionSaltGeneratorMock};
     use ethers::core::types::U256;
     use pretty_assertions::assert_eq;
 

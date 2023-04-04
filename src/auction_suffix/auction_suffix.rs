@@ -1,5 +1,3 @@
-use ethers::types::U256;
-
 use crate::{
     auction_suffix::encoder::{
         encode_auction_params, encode_flags, encode_public_resolving_deadline,
