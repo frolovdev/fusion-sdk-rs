@@ -5,6 +5,7 @@ use ethers::types::U256;
 use crate::{constants::ZERO_ADDRESS, utils::add_0x};
 
 use super::constants::*;
+use super::types::*;
 
 pub fn parse_interactions_suffix(interactions: &str) -> InteractionAdditionalInfo {
     let flags = parse_flags(interactions);
@@ -19,19 +20,20 @@ pub fn parse_interactions_suffix(interactions: &str) -> InteractionAdditionalInf
         taker_fee_receiver,
         taker_fee_ratio,
         interactions: interactions_no_taking_fee,
-    } = parse_taking_fee_and_return_remaining_interactions(&flags, interactions);
+    } = parse_taking_fee_and_return_remaining_interactions(&flags, interactions_without_flags);
 
     let PrivateAuctionDeadline {
         deadline,
         interactions: interactions_no_deadline,
-    } = parse_private_auction_deadline(interactions);
+    } = parse_private_auction_deadline(&interactions_no_taking_fee);
 
     let ResolverWhitelist {
         whitelist,
         interactions: interactions_no_whitelist,
-    } = parse_resolver_white_list(&flags, interactions);
+    } = parse_resolver_white_list(&flags, &interactions_no_deadline);
 
-    let ParsedAuctionParams { points, .. } = parse_auction_params(&flags, interactions);
+    let ParsedAuctionParams { points, .. } =
+        parse_auction_params(&flags, &interactions_no_whitelist);
 
     InteractionAdditionalInfo {
         whitelist,
@@ -40,31 +42,6 @@ pub fn parse_interactions_suffix(interactions: &str) -> InteractionAdditionalInf
         taker_fee_ratio,
         points,
     }
-}
-
-pub struct InteractionAdditionalInfo {
-    pub whitelist: Vec<AuctionWhitelistItem>,
-    pub public_resolving_deadline: u32,
-    pub taker_fee_receiver: String,
-    pub taker_fee_ratio: U256,
-    pub points: Vec<AuctionPoint>,
-}
-
-pub struct InteractionFlags {
-    pub taking_fee_enabled: bool,
-    pub resolvers_count: u8,
-    pub points_count: u8,
-}
-
-pub struct TakerFeeData {
-    pub taker_fee_ratio: U256,
-    pub taker_fee_receiver: String,
-    pub interactions: String,
-}
-
-pub struct PrivateAuctionDeadline {
-    pub deadline: u32,
-    pub interactions: String,
 }
 
 pub fn parse_taking_fee_and_return_remaining_interactions(
@@ -114,7 +91,7 @@ pub fn parse_private_auction_deadline(interactions: &str) -> PrivateAuctionDeadl
         [interactions.len() - PRIVATE_AUCTION_DEADLINE_LENGTH..interactions.len()]
         .to_string();
 
-    let private_auction_deadline = u32::from_str_radix(&private_auction_deadline_hex, 16)
+    let private_auction_deadline = u64::from_str_radix(&private_auction_deadline_hex, 16)
         .expect("Invalid public resolving deadline in interactions");
 
     PrivateAuctionDeadline {
@@ -122,16 +99,6 @@ pub fn parse_private_auction_deadline(interactions: &str) -> PrivateAuctionDeadl
         interactions: interactions[0..interactions.len() - PRIVATE_AUCTION_DEADLINE_LENGTH]
             .to_string(),
     }
-}
-
-pub struct AuctionWhitelistItem {
-    pub address: String,
-    pub allowance: u32,
-}
-
-pub struct ResolverWhitelist {
-    pub whitelist: Vec<AuctionWhitelistItem>,
-    pub interactions: String,
 }
 
 pub fn parse_resolver_white_list(
@@ -147,7 +114,7 @@ pub fn parse_resolver_white_list(
         ..interactions.len()]
         .to_string();
 
-    if addresses_packed.len() % allowed_ts_and_resolvers_len == 0 {
+    if addresses_packed.len() % allowed_ts_and_resolvers_len != 0 {
         panic!("Invalid whitelist addresses in interactions");
     } else {
     }
@@ -160,7 +127,7 @@ pub fn parse_resolver_white_list(
         let address = ts_and_address[ALLOWED_TIMESTAMP_LENGTH..].to_owned();
 
         let timestamp =
-            u32::from_str_radix(&timestamp_hex, 16).expect("Invalid resolver allowance timestamp");
+            u64::from_str_radix(&timestamp_hex, 16).expect("Invalid resolver allowance timestamp");
 
         whitelist.push(AuctionWhitelistItem {
             address: add_0x(&address).to_lowercase(),
@@ -174,16 +141,6 @@ pub fn parse_resolver_white_list(
             - (flags.resolvers_count as usize * allowed_ts_and_resolvers_len)]
             .to_string(),
     }
-}
-
-pub struct AuctionPoint {
-    pub delay: u32,
-    pub coefficient: u32,
-}
-
-pub struct ParsedAuctionParams {
-    pub interactions: String,
-    pub points: Vec<AuctionPoint>,
 }
 
 pub fn parse_auction_params(flags: &InteractionFlags, interactions: &str) -> ParsedAuctionParams {
@@ -204,7 +161,7 @@ pub fn parse_auction_params(flags: &InteractionFlags, interactions: &str) -> Par
         ..interactions.len()]
         .to_string();
 
-    if params_packed.len() % auction_params_len == 0 {
+    if params_packed.len() % auction_params_len != 0 {
         panic!("Invalid auction params in interactions");
     } else {
     }

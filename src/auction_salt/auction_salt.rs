@@ -191,8 +191,6 @@ mod tests {
 
         let salt = AuctionSalt::decode(encoded_salt);
 
-        println!("tuta");
-
         assert_eq!(salt.build(), encoded_salt.to_string());
     }
 }
