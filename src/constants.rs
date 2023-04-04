@@ -1,6 +1,11 @@
+use ethers::types::U256;
+
 pub const NATIVE_CURRENCY: &str = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 pub const ZERO_ADDRESS: &str = "0x0000000000000000000000000000000000000000";
-pub const ZERO_NUMBER: &str = "0";
+pub fn zero_number() -> U256 {
+    U256::from(0)
+}
+
 pub const ZX: &str = "0x";
 
 #[derive(Debug)]

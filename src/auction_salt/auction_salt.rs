@@ -1,12 +1,11 @@
 use rand::Rng;
-use std::str::FromStr;
+use std::{borrow::Borrow, str::FromStr};
 
 use ethers::{abi::AbiEncode, core::types::U256};
 
-use super::parser::{
-    constants::salt_mask,
-    parser::*,
-};
+use crate::utils::PadStart;
+
+use super::parser::{constants::salt_mask, parser::*};
 
 pub struct AuctionSalt {
     pub auction_start_time: u32,
@@ -89,30 +88,19 @@ impl AuctionSalt {
             "initial_rate_bump is too big, should be less than 2^24"
         );
 
-        let res = pad_start(&self.auction_start_time.encode_hex(), 8, '0')
-            + &pad_start(&self.duration.encode_hex(), 6, '0')
-            + &pad_start(&self.initial_rate_bump.encode_hex(), 6, '0')
-            + &pad_start(&self.bank_fee.encode_hex(), 8, '0')
-            + &pad_start(&self.salt.encode_hex(), 36, '0');
-
-        assert_eq!(res.len(), 64, "Some inputs were out of allowed ranges");
+        let res = self.auction_start_time.encode_hex().pad_start(8, '0')
+            + self.duration.encode_hex().pad_start(6, '0').borrow()
+            + self
+                .initial_rate_bump
+                .encode_hex()
+                .pad_start(6, '0')
+                .borrow()
+            + self.bank_fee.encode_hex().pad_start(8, '0').borrow()
+            + self.salt.encode_hex().pad_start(36, '0').borrow();
 
         U256::from_str(&("0x".to_string() + &res))
             .unwrap()
             .to_string()
-    }
-}
-
-pub fn pad_start(s: &str, width: usize, fill: char) -> String {
-    if s.len() > width {
-        s[s.len() - width..s.len()].to_string()
-    } else {
-        let pad_len = width - s.len();
-        let padded: String = std::iter::repeat(fill)
-            .take(pad_len)
-            .chain(s.chars())
-            .collect();
-        padded
     }
 }
 
