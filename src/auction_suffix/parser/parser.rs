@@ -173,7 +173,7 @@ pub fn parse_auction_params(flags: &InteractionFlags, interactions: &str) -> Par
         let bump_hex = duration_and_bump[AUCTION_DELAY_LENGTH..].to_owned();
 
         let duration =
-            u32::from_str_radix(&duration_hex, 16).expect("Invalid auction point duration");
+            u64::from_str_radix(&duration_hex, 16).expect("Invalid auction point duration");
 
         let bump = u32::from_str_radix(&bump_hex, 16).expect("Invalid auction point bump");
 
