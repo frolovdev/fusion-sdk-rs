@@ -1,4 +1,5 @@
-mod auction_salt;
-mod auction_suffix;
-mod constants;
-mod utils;
+pub mod auction_calculator;
+pub mod auction_salt;
+pub mod auction_suffix;
+pub mod constants;
+pub mod utils;
