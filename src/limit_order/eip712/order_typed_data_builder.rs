@@ -9,7 +9,9 @@ use std::str::FromStr;
 use crate::constants::ONE_INCH_ROUTER_V5;
 use crate::limit_order::types::{LimitOrderV3Struct, ToBtreeMap};
 
-use super::domain::{eip712_domain_type, order_type, LIMIT_ORDER_V3_TYPE_DATA_NAME, LIMIT_ORDER_V3_TYPE_DATA_VERSION};
+use super::domain::{
+    eip712_domain_type, order_type, LIMIT_ORDER_V3_TYPE_DATA_NAME, LIMIT_ORDER_V3_TYPE_DATA_VERSION,
+};
 
 pub fn build_order_data(
     chain_id: &U256,
@@ -68,7 +70,6 @@ pub fn domain_separator(
         .unwrap()
         .encode_hex()
 }
-
 
 pub fn get_limit_order_v3_domain(chain_id: &U256) -> EIP712Domain {
     EIP712Domain {
