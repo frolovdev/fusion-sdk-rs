@@ -1,6 +1,7 @@
+use std::ops::{Add, AddAssign};
 use std::str::FromStr;
 
-use crate::constants::NATIVE_CURRENCY;
+use crate::constants::{NATIVE_CURRENCY, ZX};
 
 pub fn is_native_currency(address: &str) -> bool {
     address.to_lowercase() == NATIVE_CURRENCY
@@ -21,7 +22,7 @@ pub fn to_sec<T: Into<u64>>(time: T) -> u64 {
 // }
 
 pub fn trim_0x(data: &str) -> &str {
-    if data.starts_with("0x") {
+    if data.starts_with(ZX) {
         &data[2..]
     } else {
         data
@@ -29,10 +30,10 @@ pub fn trim_0x(data: &str) -> &str {
 }
 
 pub fn add_0x(data: &str) -> String {
-    if data.contains("0x") {
+    if data.contains(ZX) {
         data.to_string()
     } else {
-        "0x".to_owned() + data
+        ZX.to_owned() + data
     }
 }
 
@@ -86,6 +87,24 @@ impl Substring for str {
             )
         }
     }
+}
+
+pub fn cumsum<T>(x: &[T]) -> Vec<T>
+where
+    T: Clone,
+    for<'r> &'r T: Add<&'r T, Output = T>,
+{
+    let mut y = Vec::with_capacity(x.len());
+
+    if !x.is_empty() {
+        y.push(x[0].clone());
+
+        for i in 1..x.len() {
+            y.push(&y[i - 1] + &x[i]);
+        }
+    }
+
+    y
 }
 
 #[cfg(test)]
@@ -149,6 +168,31 @@ mod tests {
         #[test]
         fn test_multiple_byte_characters() {
             assert_eq!("fõøbα®".substring(2, 5), "øbα");
+        }
+    }
+
+    mod cumsum {
+        use super::super::cumsum;
+
+        #[test]
+        fn test_cumsum() {
+            let x = vec![1, 2, 3, 4, 5];
+            let y = cumsum(&x);
+            assert_eq!(y, vec![1, 3, 6, 10, 15]);
+
+            let x1 = vec![6, 10, 3, 2];
+
+            let y1 = cumsum(&x1);
+
+            assert_eq!(y1, vec![6, 16, 19, 21]);
+        }
+
+        #[test]
+        fn test_cumsum_empty() {
+            let x: Vec<i32> = vec![];
+            let y: Vec<i32> = cumsum(&x);
+
+            assert_eq!(y, x);
         }
     }
 }

@@ -6,7 +6,7 @@ use serde_json::json;
 use std::collections::BTreeMap;
 use std::str::FromStr;
 
-use crate::constants::ONE_INCH_ROUTER_V5;
+use crate::constants::{ONE_INCH_ROUTER_V5, ZX};
 use crate::limit_order::types::{LimitOrderV3Struct, ToBtreeMap};
 
 use super::domain::{
@@ -15,14 +15,14 @@ use super::domain::{
 
 pub fn build_order_data(
     chain_id: &U256,
-    verifying_contract: &str,
+    verifying_contract: &H160,
     name: &str,
     version: &str,
-    order: LimitOrderV3Struct,
+    order: &LimitOrderV3Struct,
 ) -> TypedData {
     let domain = EIP712Domain {
         chain_id: Some(chain_id.clone()),
-        verifying_contract: Some(H160::from_str(verifying_contract).unwrap()),
+        verifying_contract: Some(verifying_contract.to_owned()),
         name: Some(name.to_string()),
         version: Some(version.to_string()),
         salt: None,
@@ -43,7 +43,7 @@ pub fn build_order_data(
 }
 
 pub fn get_order_hash(data: TypedData) -> String {
-    "0x".to_string() + &data.encode_eip712().unwrap().encode_hex()
+    ZX.to_string() + &data.encode_eip712().unwrap().encode_hex()
 }
 
 pub fn domain_separator(
@@ -56,7 +56,7 @@ pub fn domain_separator(
 
     types.insert("EIP712Domain".to_string(), eip712_domain_type());
 
-    "0x".to_string()
+    ZX.to_string()
         + &hash_struct(
             "EIP712Domain",
             &json!({

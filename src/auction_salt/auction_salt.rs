@@ -3,7 +3,7 @@ use std::{borrow::Borrow, str::FromStr};
 
 use ethers::{abi::AbiEncode, core::types::U256};
 
-use crate::utils::PadStart;
+use crate::{constants::ZX, utils::PadStart};
 
 use super::{
     parser::{constants::salt_mask, parser::*},
@@ -85,7 +85,7 @@ impl AuctionSalt {
             + self.bank_fee.encode_hex().pad_start(8, '0').borrow()
             + self.salt.encode_hex().pad_start(36, '0').borrow();
 
-        U256::from_str(&("0x".to_string() + &res))
+        U256::from_str(&(ZX.to_string() + &res))
             .unwrap()
             .to_string()
     }

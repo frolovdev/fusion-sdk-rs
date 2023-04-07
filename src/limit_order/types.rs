@@ -1,22 +1,19 @@
-use std::collections::BTreeMap;
-
-use ethers::types::transaction::eip712::{Eip712, EIP712_DOMAIN_TYPE_HASH};
-use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde_json::json;
+use std::collections::BTreeMap;
 use struct_field_names_as_array::FieldNamesAsArray;
 
 #[derive(FieldNamesAsArray, Debug)]
 pub struct LimitOrderV3Struct {
-    salt: String,
-    maker_asset: String,
-    taker_asset: String,
-    maker: String,
-    receiver: String,
-    allowed_sender: String,
-    making_amount: String,
-    taking_amount: String,
-    offsets: String,
-    interactions: String,
+    pub salt: String,
+    pub maker_asset: String,
+    pub taker_asset: String,
+    pub maker: String,
+    pub receiver: String,
+    pub allowed_sender: String,
+    pub making_amount: String,
+    pub taking_amount: String,
+    pub offsets: String,
+    pub interactions: String,
 }
 
 pub trait ToBtreeMap {
