@@ -27,10 +27,10 @@ pub fn build_order_data(
         version: Some(version.to_string()),
         salt: None,
     };
-    let mut types: BTreeMap<String, Vec<Eip712DomainType>> = BTreeMap::new();
-
-    types.insert("EIP712Domain".to_string(), eip712_domain_type());
-    types.insert("Order".to_string(), order_type());
+    let types: BTreeMap<String, Vec<Eip712DomainType>> = BTreeMap::from([
+        ("EIP712Domain".to_string(), eip712_domain_type()),
+        ("Order".to_string(), order_type()),
+    ]);
 
     let message = order.to_btree_map();
 
@@ -52,9 +52,8 @@ pub fn domain_separator(
     chain_id: &U256,
     verifying_contract: &str,
 ) -> String {
-    let mut types: BTreeMap<String, Vec<Eip712DomainType>> = BTreeMap::new();
-
-    types.insert("EIP712Domain".to_string(), eip712_domain_type());
+    let types: BTreeMap<String, Vec<Eip712DomainType>> =
+        BTreeMap::from([("EIP712Domain".to_string(), eip712_domain_type())]);
 
     ZX.to_string()
         + &hash_struct(

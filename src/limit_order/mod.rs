@@ -1,13 +1,14 @@
-use std::{borrow::Borrow, vec};
+use std::{str::FromStr, vec};
 
 use ethers::types::{
     transaction::eip712::{EIP712Domain, TypedData},
-    U256,
+    Address, Bytes, H160, U256,
 };
 
 use crate::{
     constants::{ZERO_ADDRESS, ZX},
     limit_order::eip712::order_typed_data_builder::get_limit_order_v3_domain,
+    salt::build_salt,
     utils::{cumsum, trim_0x},
 };
 
@@ -15,53 +16,51 @@ use self::{
     eip712::order_typed_data_builder::{build_order_data, get_order_hash},
     parser::parse_interactions,
     types::LimitOrderV3Struct,
-    utils::build_salt,
 };
 
 pub mod eip712;
 pub mod parser;
 pub mod types;
-mod utils;
 
 pub struct LimitOrder {
-    maker_asset: String,
-    taker_asset: String,
-    making_amount: String,
-    taking_amount: String,
-    from: String,
-    allowed_sender: String,
-    receiver: String,
-    maker_asset_data: String,
-    taker_asset_data: String,
-    get_making_amount: String,
-    get_taking_amount: String,
-    predicate: String,
-    permit: String,
-    pre_interaction: String,
-    post_interaction: String,
-    salt: String,
+    maker_asset: Address,
+    taker_asset: Address,
+    making_amount: U256,
+    taking_amount: U256,
+    from: Address,
+    allowed_sender: Address,
+    receiver: Address,
+    maker_asset_data: Bytes,
+    taker_asset_data: Bytes,
+    get_making_amount: Bytes,
+    get_taking_amount: Bytes,
+    predicate: Bytes,
+    permit: Bytes,
+    pre_interaction: Bytes,
+    post_interaction: Bytes,
+    salt: U256,
 }
 
 pub struct InteractionsData {
-    pub maker_asset_data: Option<String>,
-    pub taker_asset_data: Option<String>,
-    pub get_making_amount: Option<String>,
-    pub get_taking_amount: Option<String>,
-    pub predicate: Option<String>,
-    pub permit: Option<String>,
-    pub pre_interaction: Option<String>,
-    pub post_interaction: Option<String>,
+    pub maker_asset_data: Option<Bytes>,
+    pub taker_asset_data: Option<Bytes>,
+    pub get_making_amount: Option<Bytes>,
+    pub get_taking_amount: Option<Bytes>,
+    pub predicate: Option<Bytes>,
+    pub permit: Option<Bytes>,
+    pub pre_interaction: Option<Bytes>,
+    pub post_interaction: Option<Bytes>,
 }
 
 pub struct OrderInfoData {
-    maker_asset: String,
-    taker_asset: String,
-    making_amount: String,
-    taking_amount: String,
-    maker: String,
-    salt: Option<String>,
-    allowed_sender: Option<String>,
-    receiver: Option<String>,
+    maker_asset: Address,
+    taker_asset: Address,
+    making_amount: U256,
+    taking_amount: U256,
+    maker: Address,
+    salt: Option<U256>,
+    allowed_sender: Option<Address>,
+    receiver: Option<Address>,
 }
 
 impl LimitOrder {
@@ -78,66 +77,60 @@ impl LimitOrder {
         });
 
         LimitOrder {
-            maker_asset: order_info.maker_asset.to_string(),
-            taker_asset: order_info.taker_asset.to_string(),
-            making_amount: order_info.making_amount.to_string(),
-            taking_amount: order_info.taking_amount.to_string(),
-            salt: order_info
-                .salt
-                .as_ref()
-                .unwrap_or(build_salt().borrow())
-                .to_string(),
-            from: order_info.maker.to_string(),
-            allowed_sender: order_info
+            maker_asset: order_info.maker_asset,
+            taker_asset: order_info.taker_asset,
+            making_amount: order_info.making_amount,
+            taking_amount: order_info.taking_amount,
+            salt: *order_info.salt.as_ref().unwrap_or(&build_salt()),
+            from: order_info.maker,
+            allowed_sender: *order_info
                 .allowed_sender
                 .as_ref()
-                .unwrap_or(&ZERO_ADDRESS.to_string())
-                .to_string(),
-            receiver: order_info
+                .unwrap_or(&H160::from_str(ZERO_ADDRESS).unwrap()),
+            receiver: *order_info
                 .receiver
                 .as_ref()
-                .unwrap_or(&ZERO_ADDRESS.to_string())
-                .to_string(),
+                .unwrap_or(&H160::from_str(ZERO_ADDRESS).unwrap()),
             maker_asset_data: interactions
                 .maker_asset_data
                 .as_ref()
-                .unwrap_or(&ZX.to_string())
-                .to_string(),
+                .unwrap_or(&Bytes::from_str(ZX).unwrap())
+                .clone(),
             taker_asset_data: interactions
                 .taker_asset_data
                 .as_ref()
-                .unwrap_or(&ZX.to_string())
-                .to_string(),
+                .unwrap_or(&Bytes::from_str(ZX).unwrap())
+                .clone(),
             get_making_amount: interactions
                 .get_making_amount
                 .as_ref()
-                .unwrap_or(&ZX.to_string())
-                .to_string(),
+                .unwrap_or(&Bytes::from_str(ZX).unwrap())
+                .clone(),
             get_taking_amount: interactions
                 .get_taking_amount
                 .as_ref()
-                .unwrap_or(&ZX.to_string())
-                .to_string(),
+                .unwrap_or(&Bytes::from_str(ZX).unwrap())
+                .clone(),
             predicate: interactions
                 .predicate
                 .as_ref()
-                .unwrap_or(&ZX.to_string())
-                .to_string(),
+                .unwrap_or(&Bytes::from_str(ZX).unwrap())
+                .clone(),
             permit: interactions
                 .permit
                 .as_ref()
-                .unwrap_or(&ZX.to_string())
-                .to_string(),
+                .unwrap_or(&Bytes::from_str(ZX).unwrap())
+                .clone(),
             pre_interaction: interactions
                 .pre_interaction
                 .as_ref()
-                .unwrap_or(&ZX.to_string())
-                .to_string(),
+                .unwrap_or(&Bytes::from_str(ZX).unwrap())
+                .clone(),
             post_interaction: interactions
                 .post_interaction
                 .as_ref()
-                .unwrap_or(&ZX.to_string())
-                .to_string(),
+                .unwrap_or(&Bytes::from_str(ZX).unwrap())
+                .clone(),
         }
     }
 
@@ -171,25 +164,25 @@ impl LimitOrder {
     pub fn decode(r#struct: &LimitOrderV3Struct) -> Self {
         let interactions = parse_interactions(&r#struct.offsets, &r#struct.interactions);
 
-        let maker_asset_data = interactions.get("makerAssetData").unwrap().to_owned();
-        let taker_asset_data = interactions.get("takerAssetData").unwrap().to_owned();
-        let get_making_amount = interactions.get("getMakingAmount").unwrap().to_owned();
-        let get_taking_amount = interactions.get("getTakingAmount").unwrap().to_owned();
+        let maker_asset_data = interactions.get("maker_asset_data").unwrap().to_owned();
+        let taker_asset_data = interactions.get("taker_asset_data").unwrap().to_owned();
+        let get_making_amount = interactions.get("get_making_amount").unwrap().to_owned();
+        let get_taking_amount = interactions.get("get_taking_amount").unwrap().to_owned();
         let predicate = interactions.get("predicate").unwrap().to_owned();
         let permit = interactions.get("permit").unwrap().to_owned();
-        let pre_interaction = interactions.get("preInteraction").unwrap().to_owned();
-        let post_interaction = interactions.get("postInteraction").unwrap().to_owned();
+        let pre_interaction = interactions.get("pre_interaction").unwrap().to_owned();
+        let post_interaction = interactions.get("post_interaction").unwrap().to_owned();
 
         LimitOrder::new(
             &OrderInfoData {
-                maker_asset: r#struct.maker_asset.to_string(),
-                taker_asset: r#struct.taker_asset.to_string(),
-                making_amount: r#struct.making_amount.to_string(),
-                taking_amount: r#struct.taking_amount.to_string(),
-                maker: r#struct.maker.to_string(),
-                salt: Some(r#struct.salt.to_string()),
-                allowed_sender: Some(r#struct.allowed_sender.to_string()),
-                receiver: Some(r#struct.receiver.to_string()),
+                maker_asset: r#struct.maker_asset,
+                taker_asset: r#struct.taker_asset,
+                making_amount: r#struct.making_amount,
+                taking_amount: r#struct.taking_amount,
+                maker: r#struct.maker,
+                salt: Some(r#struct.salt),
+                allowed_sender: Some(r#struct.allowed_sender),
+                receiver: Some(r#struct.receiver),
             },
             Some(&InteractionsData {
                 maker_asset_data: Some(maker_asset_data),
@@ -206,42 +199,33 @@ impl LimitOrder {
 
     pub fn build(&self) -> LimitOrderV3Struct {
         let all_interactions = vec![
-            self.maker_asset_data.to_string(),
-            self.taker_asset_data.to_string(),
-            self.get_making_amount.to_string(),
-            self.get_taking_amount.to_string(),
-            self.predicate.to_string(),
-            self.permit.to_string(),
-            self.pre_interaction.to_string(),
-            self.post_interaction.to_string(),
+            self.maker_asset_data.clone(),
+            self.taker_asset_data.clone(),
+            self.get_making_amount.clone(),
+            self.get_taking_amount.clone(),
+            self.predicate.clone(),
+            self.permit.clone(),
+            self.pre_interaction.clone(),
+            self.post_interaction.clone(),
         ];
 
-        let lengths = all_interactions
-            .iter()
-            .map(|x| ((x.len() / 2) - 1) as u64)
-            .collect::<Vec<u64>>();
-
-        let offsets = cumsum(&lengths)
-            .iter()
-            .fold(U256::from(0), |acc, x| acc + U256::from(*x));
-
-        let trimmed_all_interactions = all_interactions
-            .iter()
-            .map(|x| trim_0x(x.as_str()))
-            .collect::<Vec<&str>>();
-        let interactions: String = ZX.to_owned() + &trimmed_all_interactions.join("");
+        let lengths: Vec<usize> = all_interactions.iter().map(|x| x.len()).collect();
+        let sums = cumsum(&lengths);
+        let offsets = sums.iter().enumerate().fold(U256::from(0), |acc, (i, x)| {
+            acc + (U256::from(*x) << 32 * i)
+        });
 
         LimitOrderV3Struct {
-            salt: self.salt.to_string(),
-            maker_asset: self.maker_asset.to_string(),
-            taker_asset: self.taker_asset.to_string(),
-            making_amount: self.making_amount.to_string(),
-            taking_amount: self.taking_amount.to_string(),
-            maker: self.from.to_string(),
-            allowed_sender: self.allowed_sender.to_string(),
-            receiver: self.receiver.to_string(),
-            offsets: offsets.to_string(),
-            interactions,
+            salt: self.salt,
+            maker_asset: self.maker_asset,
+            taker_asset: self.taker_asset,
+            making_amount: self.making_amount,
+            taking_amount: self.taking_amount,
+            maker: self.from,
+            allowed_sender: self.allowed_sender,
+            receiver: self.receiver,
+            offsets: offsets,
+            interactions: all_interactions.concat().into(),
         }
     }
 
@@ -271,10 +255,14 @@ impl LimitOrder {
 mod tests {
     use std::{collections::BTreeMap, str::FromStr, vec};
 
-    use ethers::types::{
-        transaction::eip712::{EIP712Domain, Eip712DomainType, TypedData},
-        H160, U256,
+    use ethers::{
+        abi::Address,
+        types::{
+            transaction::eip712::{EIP712Domain, Eip712DomainType, TypedData},
+            Bytes, H160, U256,
+        },
     };
+    use pretty_assertions::assert_eq;
     use serde_json::json;
 
     use crate::limit_order::types::LimitOrderV3Struct;
@@ -285,12 +273,14 @@ mod tests {
     fn should_create_limit_order() {
         let limit_order = LimitOrder::new(
             &OrderInfoData {
-                maker_asset: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2".to_string(),
-                taker_asset: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48".to_string(),
-                making_amount: "1000000000000000000".to_string(),
-                taking_amount: "1420000000".to_string(),
-                maker: "0x00000000219ab540356cbb839cbe05303d7705fa".to_string(),
-                salt: Some("1673549418040".to_string()),
+                maker_asset: Address::from_str("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")
+                    .unwrap(),
+                taker_asset: Address::from_str("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48")
+                    .unwrap(),
+                making_amount: U256::from(1000000000000000000 as i64),
+                taking_amount: U256::from(1420000000 as i64),
+                maker: Address::from_str("0x00000000219ab540356cbb839cbe05303d7705fa").unwrap(),
+                salt: Some(U256::from(1673549418040 as i64)),
                 allowed_sender: None,
                 receiver: None,
             },
@@ -300,36 +290,59 @@ mod tests {
         assert_eq!(
             limit_order.build(),
             LimitOrderV3Struct {
-                allowed_sender: "0x0000000000000000000000000000000000000000".to_string(),
-                interactions: "0x".to_string(),
-                maker: "0x00000000219ab540356cbb839cbe05303d7705fa".to_string(),
-                maker_asset: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2".to_string(),
-                making_amount: "1000000000000000000".to_string(),
-                offsets: "0".to_string(),
-                receiver: "0x0000000000000000000000000000000000000000".to_string(),
-                salt: "1673549418040".to_string(),
-                taker_asset: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48".to_string(),
-                taking_amount: "1420000000".to_string()
+                allowed_sender: Address::from_str("0x0000000000000000000000000000000000000000")
+                    .unwrap(),
+                interactions: Bytes::from_str("0x").unwrap(),
+                maker: Address::from_str("0x00000000219ab540356cbb839cbe05303d7705fa").unwrap(),
+                maker_asset: Address::from_str("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")
+                    .unwrap(),
+                making_amount: U256::from(1000000000000000000 as i64),
+                offsets: U256::from(0),
+                receiver: Address::from_str("0x0000000000000000000000000000000000000000").unwrap(),
+                salt: U256::from(1673549418040 as i64),
+                taker_asset: Address::from_str("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48")
+                    .unwrap(),
+                taking_amount: U256::from(1420000000)
             }
         )
     }
 
-    fn should_create_limit_order_with_timestamp_below() {}
+    // fn should_create_limit_order_with_timestamp_below() {}
 
-    fn should_create_limit_order_with_timestamp_above_that_will_unwrap_maker_weth_to_eth() {}
+    // fn should_create_limit_order_with_timestamp_above_that_will_unwrap_maker_weth_to_eth() {}
 
-    fn should_decode_limit_order() {}
+    #[test]
+    fn should_decode_limit_order() {
+        let order_struct = LimitOrderV3Struct {
+            allowed_sender: Address::from_str("0x0000000000000000000000000000000000000000").unwrap(),
+            interactions: Bytes::from_str("0x63592c2b0000000000000000000000000000000000000000000000000000000063c0566a08b067ad41e45babe5bbb52fc2fe7f692f628b0600000000219ab540356cbb839cbe05303d7705fa".trim_start_matches("0x")).unwrap(),
+            maker: Address::from_str("0x00000000219ab540356cbb839cbe05303d7705fa").unwrap(),
+            maker_asset: Address::from_str("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2").unwrap(),
+            making_amount: U256::from(1000000000000000000 as i64),
+            offsets: U256::from_dec_str("2048955946929424286921227713067743020696385405755235979139736848564224").unwrap(),
+            receiver: Address::from_str("0x0000000000000000000000000000000000000000").unwrap(),
+            salt: U256::from(1673549418040 as i64),
+            taker_asset: Address::from_str("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48").unwrap(),
+            taking_amount: U256::from(1420000000 as i64),
+        };
+
+        let order = LimitOrder::decode(&order_struct);
+
+        assert_eq!(order.build(), order_struct)
+    }
 
     #[test]
     fn should_get_limit_order_typed_data() {
         let limit_order = LimitOrder::new(
             &OrderInfoData {
-                maker_asset: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2".to_string(),
-                taker_asset: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48".to_string(),
-                making_amount: "1000000000000000000".to_string(),
-                taking_amount: "1420000000".to_string(),
-                maker: "0x00000000219ab540356cbb839cbe05303d7705fa".to_string(),
-                salt: Some("1673549418040".to_string()),
+                maker_asset: Address::from_str("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")
+                    .unwrap(),
+                taker_asset: Address::from_str("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48")
+                    .unwrap(),
+                making_amount: U256::from(1000000000000000000 as i64),
+                taking_amount: U256::from(1420000000),
+                maker: Address::from_str("0x00000000219ab540356cbb839cbe05303d7705fa").unwrap(),
+                salt: Some(U256::from(1673549418040 as i64)),
                 allowed_sender: None,
                 receiver: None,
             },
@@ -453,26 +466,16 @@ mod tests {
 
     #[test]
     fn should_get_limit_order_hash() {
-        // const order = new LimitOrder({
-        //     makerAsset: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-        //     takerAsset: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        //     makingAmount: '1000000000000000000',
-        //     takingAmount: '1420000000',
-        //     maker: '0x00000000219ab540356cbb839cbe05303d7705fa'
-        // })
-
-        // expect(order.getOrderHash()).toBe(
-        //     '0x4bdb758d3d4b265367c461cdb12b2fbe92fd8f2bcc9423393e9da4490d6157c4'
-        // )
-
         let limit_order = LimitOrder::new(
             &OrderInfoData {
-                maker_asset: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2".to_string(),
-                taker_asset: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48".to_string(),
-                making_amount: "1000000000000000000".to_string(),
-                taking_amount: "1420000000".to_string(),
-                maker: "0x00000000219ab540356cbb839cbe05303d7705fa".to_string(),
-                salt: Some("1673549418040".to_string()),
+                maker_asset: Address::from_str("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")
+                    .unwrap(),
+                taker_asset: Address::from_str("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48")
+                    .unwrap(),
+                making_amount: U256::from(1000000000000000000 as i64),
+                taking_amount: U256::from(1420000000),
+                maker: Address::from_str("0x00000000219ab540356cbb839cbe05303d7705fa").unwrap(),
+                salt: Some(U256::from(1673549418040 as i64)),
                 allowed_sender: None,
                 receiver: None,
             },

@@ -1,5 +1,4 @@
-use std::ops::{Add, AddAssign};
-use std::str::FromStr;
+use std::ops::Add;
 
 use crate::constants::{NATIVE_CURRENCY, ZX};
 
@@ -11,15 +10,6 @@ pub fn to_sec<T: Into<u64>>(time: T) -> u64 {
     let t = time.into();
     t / 1000
 }
-
-// pub fn to_bn<T: AsRef<str>>(val: T) -> BigUint {
-//     let val = val.as_ref();
-//     if let Ok(n) = val.parse::<u64>() {
-//         return n.to_biguint().expect("Failed to convert to biguint");
-//     }
-//     let val = trim_0x(val);
-//     BigUint::from_str(val).expect("Invalid hex string")
-// }
 
 pub fn trim_0x(data: &str) -> &str {
     if data.starts_with(ZX) {
@@ -109,6 +99,8 @@ where
 
 #[cfg(test)]
 mod tests {
+
+    use pretty_assertions::assert_eq;
 
     mod pad_start {
         use super::super::PadStart;

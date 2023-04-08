@@ -1,45 +1,28 @@
 pub mod parser;
 pub mod types;
 
-use crate::{constants::ZX, utils::PadStart};
-use ethers::{abi::AbiEncode, core::types::U256};
+use crate::{constants::ZX, salt::build_salt, utils::PadStart};
+use ethers::{abi::AbiEncode, types::U256};
 use parser::{constants::salt_mask, *};
-use rand::Rng;
 use std::{borrow::Borrow, str::FromStr};
 use types::{AuctionSalt, AuctionSaltData};
 
-trait AuctionSaltGeneratorTrait {
-    fn generate(&self) -> U256;
-}
-
-struct AuctionSaltGeneratorRand {}
-
-impl AuctionSaltGeneratorTrait for AuctionSaltGeneratorRand {
-    fn generate(&self) -> U256 {
-        let randInt = rand::thread_rng().gen_range(0..10000);
-
-        U256::from(randInt)
-    }
-}
-
-struct AuctionSaltGeneratorMock {}
-
-impl AuctionSaltGeneratorTrait for AuctionSaltGeneratorMock {
-    fn generate(&self) -> U256 {
-        U256::from(1000)
-    }
-}
-
 impl AuctionSalt {
-    pub fn new(auction: AuctionSaltData, rng: Box<dyn AuctionSaltGeneratorTrait>) -> Self {
+    pub fn new<F>(auction: AuctionSaltData, salt_generator: Option<F>) -> Self
+    where
+        F: Fn() -> U256,
+    {
         let salt = if let Some(salt) = auction.salt {
-            let salt_bn = salt;
-            if salt_mask().lt(&salt_bn) {
+            if salt_mask().lt(&salt) {
                 panic!("salt should be less than 18 bytes");
             }
             salt
         } else {
-            rng.generate()
+            if let Some(salt_generator) = salt_generator {
+                salt_generator()
+            } else {
+                build_salt()
+            }
         };
 
         Self {
@@ -93,7 +76,7 @@ impl AuctionSalt {
 mod tests {
     use crate::auction_salt::types::AuctionSalt;
 
-    use super::{AuctionSaltData, AuctionSaltGeneratorMock};
+    use super::AuctionSaltData;
     use ethers::core::types::U256;
     use pretty_assertions::assert_eq;
 
@@ -107,7 +90,7 @@ mod tests {
                 bank_fee: U256::from(0),
                 salt: None,
             },
-            Box::new(AuctionSaltGeneratorMock {}),
+            Some(|| U256::from(1000)),
         );
 
         assert_eq!(
@@ -127,7 +110,7 @@ mod tests {
                 bank_fee: U256::from(123123123),
                 salt: None,
             },
-            Box::new(AuctionSaltGeneratorMock {}),
+            Some(|| U256::from(1000)),
         );
 
         assert_eq!(
@@ -148,7 +131,7 @@ mod tests {
                 bank_fee: U256::from(123123123),
                 salt: None,
             },
-            Box::new(AuctionSaltGeneratorMock {}),
+            Some(|| U256::from(1000)),
         );
 
         salt.build();
@@ -165,7 +148,7 @@ mod tests {
                 bank_fee: U256::from(123123123),
                 salt: None,
             },
-            Box::new(AuctionSaltGeneratorMock {}),
+            Some(|| U256::from(1000)),
         );
 
         salt.build();
