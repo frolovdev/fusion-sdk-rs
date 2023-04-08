@@ -269,6 +269,14 @@ impl LimitOrder {
 
 #[cfg(test)]
 mod tests {
+    use std::{collections::BTreeMap, str::FromStr, vec};
+
+    use ethers::types::{
+        transaction::eip712::{EIP712Domain, Eip712DomainType, TypedData},
+        H160, U256,
+    };
+    use serde_json::json;
+
     use crate::limit_order::types::LimitOrderV3Struct;
 
     use super::{LimitOrder, OrderInfoData};
@@ -312,7 +320,136 @@ mod tests {
 
     fn should_decode_limit_order() {}
 
-    fn should_get_limit_order_typed_data() {}
+    #[test]
+    fn should_get_limit_order_typed_data() {
+        let limit_order = LimitOrder::new(
+            &OrderInfoData {
+                maker_asset: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2".to_string(),
+                taker_asset: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48".to_string(),
+                making_amount: "1000000000000000000".to_string(),
+                taking_amount: "1420000000".to_string(),
+                maker: "0x00000000219ab540356cbb839cbe05303d7705fa".to_string(),
+                salt: Some("1673549418040".to_string()),
+                allowed_sender: None,
+                receiver: None,
+            },
+            None,
+        );
+
+        let mut expected_message: BTreeMap<String, serde_json::Value> = BTreeMap::from([
+            (
+                "allowedSender".to_string(),
+                json!("0x0000000000000000000000000000000000000000"),
+            ),
+            ("interactions".to_string(), json!("0x")),
+            (
+                "maker".to_string(),
+                json!("0x00000000219ab540356cbb839cbe05303d7705fa"),
+            ),
+            (
+                "makerAsset".to_string(),
+                json!("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
+            ),
+            ("makingAmount".to_string(), json!("1000000000000000000")),
+            ("offsets".to_string(), json!("0")),
+            (
+                "receiver".to_string(),
+                json!("0x0000000000000000000000000000000000000000"),
+            ),
+            ("salt".to_string(), json!("1673549418040")),
+            (
+                "takerAsset".to_string(),
+                json!("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
+            ),
+            ("takingAmount".to_string(), json!("1420000000")),
+        ]);
+
+        let expected_types: BTreeMap<String, Vec<Eip712DomainType>> = BTreeMap::from([
+            (
+                "EIP712Domain".to_string(),
+                vec![
+                    Eip712DomainType {
+                        name: "name".to_string(),
+                        r#type: "string".to_string(),
+                    },
+                    Eip712DomainType {
+                        name: "version".to_string(),
+                        r#type: "string".to_string(),
+                    },
+                    Eip712DomainType {
+                        name: "chainId".to_string(),
+                        r#type: "uint256".to_string(),
+                    },
+                    Eip712DomainType {
+                        name: "verifyingContract".to_string(),
+                        r#type: "address".to_string(),
+                    },
+                ],
+            ),
+            (
+                "Order".to_string(),
+                vec![
+                    Eip712DomainType {
+                        name: "salt".to_string(),
+                        r#type: "uint256".to_string(),
+                    },
+                    Eip712DomainType {
+                        name: "makerAsset".to_string(),
+                        r#type: "address".to_string(),
+                    },
+                    Eip712DomainType {
+                        name: "takerAsset".to_string(),
+                        r#type: "address".to_string(),
+                    },
+                    Eip712DomainType {
+                        name: "maker".to_string(),
+                        r#type: "address".to_string(),
+                    },
+                    Eip712DomainType {
+                        name: "receiver".to_string(),
+                        r#type: "address".to_string(),
+                    },
+                    Eip712DomainType {
+                        name: "allowedSender".to_string(),
+                        r#type: "address".to_string(),
+                    },
+                    Eip712DomainType {
+                        name: "makingAmount".to_string(),
+                        r#type: "uint256".to_string(),
+                    },
+                    Eip712DomainType {
+                        name: "takingAmount".to_string(),
+                        r#type: "uint256".to_string(),
+                    },
+                    Eip712DomainType {
+                        name: "offsets".to_string(),
+                        r#type: "uint256".to_string(),
+                    },
+                    Eip712DomainType {
+                        name: "interactions".to_string(),
+                        r#type: "bytes".to_string(),
+                    },
+                ],
+            ),
+        ]);
+
+        let expected = TypedData {
+            domain: EIP712Domain {
+                name: Some("1inch Aggregation Router".to_string()),
+                version: Some("5".to_string()),
+                chain_id: Some(U256::from(1)),
+                verifying_contract: Some(
+                    H160::from_str("0x1111111254eeb25477b68fb85ed929f73a960582").unwrap(),
+                ),
+                salt: None,
+            },
+            primary_type: "Order".to_string(),
+            types: expected_types,
+            message: expected_message,
+        };
+
+        assert_eq!(limit_order.get_typed_data(None), expected);
+    }
 
     #[test]
     fn should_get_limit_order_hash() {
