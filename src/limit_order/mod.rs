@@ -336,7 +336,7 @@ mod tests {
             None,
         );
 
-        let mut expected_message: BTreeMap<String, serde_json::Value> = BTreeMap::from([
+        let expected_message: BTreeMap<String, serde_json::Value> = BTreeMap::from([
             (
                 "allowedSender".to_string(),
                 json!("0x0000000000000000000000000000000000000000"),
