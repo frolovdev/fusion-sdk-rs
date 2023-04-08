@@ -2,7 +2,7 @@ use serde_json::json;
 use std::collections::BTreeMap;
 use struct_field_names_as_array::FieldNamesAsArray;
 
-#[derive(FieldNamesAsArray, Debug)]
+#[derive(FieldNamesAsArray, Debug, PartialEq)]
 pub struct LimitOrderV3Struct {
     pub salt: String,
     pub maker_asset: String,
@@ -26,12 +26,12 @@ impl ToBtreeMap for LimitOrderV3Struct {
 
         map.insert("salt".to_string(), json!(self.salt));
         map.insert("makerAsset".to_string(), json!(self.maker_asset));
-        map.insert("taker_asset".to_string(), json!(self.taker_asset));
+        map.insert("takerAsset".to_string(), json!(self.taker_asset));
         map.insert("maker".to_string(), json!(self.maker));
         map.insert("receiver".to_string(), json!(self.receiver));
-        map.insert("allowed_sender".to_string(), json!(self.allowed_sender));
-        map.insert("making_amount".to_string(), json!(self.making_amount));
-        map.insert("taking_amount".to_string(), json!(self.taking_amount));
+        map.insert("allowedSender".to_string(), json!(self.allowed_sender));
+        map.insert("makingAmount".to_string(), json!(self.making_amount));
+        map.insert("takingAmount".to_string(), json!(self.taking_amount));
         map.insert("offsets".to_string(), json!(self.offsets));
         map.insert("interactions".to_string(), json!(self.interactions));
 
@@ -64,19 +64,19 @@ mod tests {
 
         let map = limit_order.to_btree_map();
 
-        let expectedMap = BTreeMap::from([
+        let expected_map = BTreeMap::from([
             ("salt".to_string(), json!("kek")),
             ("makerAsset".to_string(), json!("kek")),
-            ("taker_asset".to_string(), json!("kek")),
+            ("takerAsset".to_string(), json!("kek")),
             ("maker".to_string(), json!("kek")),
             ("receiver".to_string(), json!("kek")),
-            ("allowed_sender".to_string(), json!("kek")),
-            ("making_amount".to_string(), json!("kek")),
-            ("taking_amount".to_string(), json!("kek")),
+            ("allowedSender".to_string(), json!("kek")),
+            ("makingAmount".to_string(), json!("kek")),
+            ("takingAmount".to_string(), json!("kek")),
             ("offsets".to_string(), json!("kek")),
             ("interactions".to_string(), json!("kek")),
         ]);
 
-        assert_eq!(map, expectedMap);
+        assert_eq!(map, expected_map);
     }
 }

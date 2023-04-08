@@ -171,14 +171,14 @@ impl LimitOrder {
     pub fn decode(r#struct: &LimitOrderV3Struct) -> Self {
         let interactions = parse_interactions(&r#struct.offsets, &r#struct.interactions);
 
-        let maker_asset_data = interactions.get("maker_asset_data").unwrap().to_owned();
-        let taker_asset_data = interactions.get("taker_asset_data").unwrap().to_owned();
-        let get_making_amount = interactions.get("get_making_amount").unwrap().to_owned();
-        let get_taking_amount = interactions.get("get_taking_amount").unwrap().to_owned();
+        let maker_asset_data = interactions.get("makerAssetData").unwrap().to_owned();
+        let taker_asset_data = interactions.get("takerAssetData").unwrap().to_owned();
+        let get_making_amount = interactions.get("getMakingAmount").unwrap().to_owned();
+        let get_taking_amount = interactions.get("getTakingAmount").unwrap().to_owned();
         let predicate = interactions.get("predicate").unwrap().to_owned();
         let permit = interactions.get("permit").unwrap().to_owned();
-        let pre_interaction = interactions.get("pre_interaction").unwrap().to_owned();
-        let post_interaction = interactions.get("post_interaction").unwrap().to_owned();
+        let pre_interaction = interactions.get("preInteraction").unwrap().to_owned();
+        let post_interaction = interactions.get("postInteraction").unwrap().to_owned();
 
         LimitOrder::new(
             &OrderInfoData {
@@ -264,5 +264,87 @@ impl LimitOrder {
             .to_owned();
 
         get_order_hash(self.get_typed_data(Some(&domain)))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::limit_order::types::LimitOrderV3Struct;
+
+    use super::{LimitOrder, OrderInfoData};
+
+    #[test]
+    fn should_create_limit_order() {
+        let limit_order = LimitOrder::new(
+            &OrderInfoData {
+                maker_asset: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2".to_string(),
+                taker_asset: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48".to_string(),
+                making_amount: "1000000000000000000".to_string(),
+                taking_amount: "1420000000".to_string(),
+                maker: "0x00000000219ab540356cbb839cbe05303d7705fa".to_string(),
+                salt: Some("1673549418040".to_string()),
+                allowed_sender: None,
+                receiver: None,
+            },
+            None,
+        );
+
+        assert_eq!(
+            limit_order.build(),
+            LimitOrderV3Struct {
+                allowed_sender: "0x0000000000000000000000000000000000000000".to_string(),
+                interactions: "0x".to_string(),
+                maker: "0x00000000219ab540356cbb839cbe05303d7705fa".to_string(),
+                maker_asset: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2".to_string(),
+                making_amount: "1000000000000000000".to_string(),
+                offsets: "0".to_string(),
+                receiver: "0x0000000000000000000000000000000000000000".to_string(),
+                salt: "1673549418040".to_string(),
+                taker_asset: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48".to_string(),
+                taking_amount: "1420000000".to_string()
+            }
+        )
+    }
+
+    fn should_create_limit_order_with_timestamp_below() {}
+
+    fn should_create_limit_order_with_timestamp_above_that_will_unwrap_maker_weth_to_eth() {}
+
+    fn should_decode_limit_order() {}
+
+    fn should_get_limit_order_typed_data() {}
+
+    #[test]
+    fn should_get_limit_order_hash() {
+        // const order = new LimitOrder({
+        //     makerAsset: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        //     takerAsset: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        //     makingAmount: '1000000000000000000',
+        //     takingAmount: '1420000000',
+        //     maker: '0x00000000219ab540356cbb839cbe05303d7705fa'
+        // })
+
+        // expect(order.getOrderHash()).toBe(
+        //     '0x4bdb758d3d4b265367c461cdb12b2fbe92fd8f2bcc9423393e9da4490d6157c4'
+        // )
+
+        let limit_order = LimitOrder::new(
+            &OrderInfoData {
+                maker_asset: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2".to_string(),
+                taker_asset: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48".to_string(),
+                making_amount: "1000000000000000000".to_string(),
+                taking_amount: "1420000000".to_string(),
+                maker: "0x00000000219ab540356cbb839cbe05303d7705fa".to_string(),
+                salt: Some("1673549418040".to_string()),
+                allowed_sender: None,
+                receiver: None,
+            },
+            None,
+        );
+
+        assert_eq!(
+            limit_order.get_order_hash(None),
+            "0x4bdb758d3d4b265367c461cdb12b2fbe92fd8f2bcc9423393e9da4490d6157c4"
+        );
     }
 }

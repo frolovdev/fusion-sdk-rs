@@ -43,7 +43,7 @@ pub fn build_order_data(
 }
 
 pub fn get_order_hash(data: TypedData) -> String {
-    ZX.to_string() + &data.encode_eip712().unwrap().encode_hex()
+    data.encode_eip712().unwrap().encode_hex()
 }
 
 pub fn domain_separator(
