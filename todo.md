@@ -1,1 +1,2 @@
-* taker fee ratio tests
+* limit order tests
+* auction calculator
