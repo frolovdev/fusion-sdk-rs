@@ -41,10 +41,10 @@ pub fn get_offset_for_interaction(offsets: &U256, field: u8) -> (usize, usize) {
     let from_byte = if field == 0 {
         U256::from(0)
     } else {
-        (offsets >> ((field - 1) * 32)).maskn(32)
+        (offsets >> U256::from((field - 1) * 32)).maskn(32)
     };
 
-    let to_byte = (offsets >> (field * 32)).maskn(32);
+    let to_byte = (offsets >> U256::from(field * 32)).maskn(32);
 
     return (from_byte.as_usize(), to_byte.as_usize());
 }
