@@ -2,14 +2,14 @@ use std::{str::FromStr, vec};
 
 use ethers::types::{
     transaction::eip712::{EIP712Domain, TypedData},
-    Address, Bytes, H160, U256,
+    Address, Bytes, U256,
 };
 
 use crate::{
     constants::{ZERO_ADDRESS, ZX},
     limit_order::eip712::order_typed_data_builder::get_limit_order_v3_domain,
     salt::build_salt,
-    utils::{cumsum, trim_0x},
+    utils::cumsum,
 };
 
 use self::{
@@ -83,14 +83,8 @@ impl LimitOrder {
             taking_amount: order_info.taking_amount,
             salt: *order_info.salt.as_ref().unwrap_or(&build_salt()),
             from: order_info.maker,
-            allowed_sender: *order_info
-                .allowed_sender
-                .as_ref()
-                .unwrap_or(&H160::from_str(ZERO_ADDRESS).unwrap()),
-            receiver: *order_info
-                .receiver
-                .as_ref()
-                .unwrap_or(&H160::from_str(ZERO_ADDRESS).unwrap()),
+            allowed_sender: *order_info.allowed_sender.as_ref().unwrap_or(&ZERO_ADDRESS),
+            receiver: *order_info.receiver.as_ref().unwrap_or(&ZERO_ADDRESS),
             maker_asset_data: interactions
                 .maker_asset_data
                 .as_ref()

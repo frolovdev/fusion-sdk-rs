@@ -54,9 +54,9 @@ impl ToBtreeMap for LimitOrderV3Struct {
 mod tests {
     use std::str::FromStr;
 
+    use super::*;
     use crate::utils::trim_0x;
     use pretty_assertions::assert_eq;
-    use super::*;
 
     #[test]
     fn success() {

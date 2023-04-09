@@ -9,11 +9,12 @@ use crate::{
         encode_taking_fee_data, encode_whitelist,
     },
     constants::{zero_number, ZERO_ADDRESS},
-    utils::to_sec,
 };
-use constants::NO_PUBLIC_RESOLVING_DEADLINE;
+use ethers::types::Bytes;
 use parser::parse_interactions_suffix;
 use types::{AuctionSuffix, SettlementSuffixData, TakingFee};
+
+use self::constants::no_public_resolving_deadline;
 
 impl AuctionSuffix {
     pub fn new(suffix: SettlementSuffixData) -> Self {
@@ -22,11 +23,11 @@ impl AuctionSuffix {
             whitelist: suffix.whitelist,
             public_resolving_deadline: suffix
                 .public_resolving_deadline
-                .unwrap_or_else(|| to_sec(NO_PUBLIC_RESOLVING_DEADLINE)),
-            taker_fee_receiver: suffix.fee.as_ref().map_or_else(
-                || ZERO_ADDRESS.to_string(),
-                |f| f.taking_fee_receiver.to_owned(),
-            ),
+                .unwrap_or_else(|| no_public_resolving_deadline()),
+            taker_fee_receiver: suffix
+                .fee
+                .as_ref()
+                .map_or_else(|| ZERO_ADDRESS, |f| f.taking_fee_receiver.to_owned()),
             taker_fee_ratio: suffix
                 .fee
                 .as_ref()
@@ -34,7 +35,7 @@ impl AuctionSuffix {
         }
     }
 
-    pub fn decode(interactions: &str) -> Self {
+    pub fn decode(interactions: &Bytes) -> Self {
         let suffix = parse_interactions_suffix(interactions);
 
         AuctionSuffix::new(SettlementSuffixData {
@@ -66,9 +67,12 @@ impl AuctionSuffix {
 #[cfg(test)]
 mod tests {
 
+    use std::str::FromStr;
+
     use crate::auction_suffix::parser::types::{AuctionPoint, AuctionWhitelistItem};
 
     use super::{AuctionSuffix, SettlementSuffixData};
+    use ethers::types::{Address, Bytes, U256};
     use pretty_assertions::assert_eq;
     #[test]
     fn should_create_suffix_with_required_params() {
@@ -78,7 +82,7 @@ mod tests {
                 delay: 12,
             }],
             whitelist: vec![AuctionWhitelistItem {
-                address: "0x00000000219ab540356cbb839cbe05303d7705fa".to_string(),
+                address: Address::from_str("0x00000000219ab540356cbb839cbe05303d7705fa").unwrap(),
                 allowance: 0,
             }],
             public_resolving_deadline: None,
@@ -99,10 +103,10 @@ mod tests {
                 delay: 12,
             }],
             whitelist: vec![AuctionWhitelistItem {
-                address: "0x00000000219ab540356cbb839cbe05303d7705fa".to_string(),
+                address: Address::from_str("0x00000000219ab540356cbb839cbe05303d7705fa").unwrap(),
                 allowance: 0,
             }],
-            public_resolving_deadline: Some(1673549418),
+            public_resolving_deadline: Some(U256::from(1673549418)),
             fee: None,
         });
 
@@ -114,10 +118,15 @@ mod tests {
 
     #[test]
     fn should_decode_auction_suffix() {
-        let encoded_suffix = "000c004e200000000000000000219ab540356cbb839cbe05303d7705fa63c0566a09";
+        let encoded_suffix =
+            Bytes::from_str("000c004e200000000000000000219ab540356cbb839cbe05303d7705fa63c0566a09")
+                .unwrap();
 
-        let suffix = AuctionSuffix::decode(encoded_suffix);
+        let suffix = AuctionSuffix::decode(&encoded_suffix);
 
-        assert_eq!(suffix.build(), encoded_suffix);
+        assert_eq!(
+            suffix.build(),
+            "000c004e200000000000000000219ab540356cbb839cbe05303d7705fa63c0566a09"
+        );
     }
 }

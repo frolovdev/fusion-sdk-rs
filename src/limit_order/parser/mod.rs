@@ -1,6 +1,8 @@
-use std::{cmp::min, collections::HashMap, ops::BitAnd, str::FromStr};
+use std::collections::HashMap;
 
 use ethers::types::{Bytes, U256};
+
+use crate::utils::Maskn;
 
 type ParsedInteractions = HashMap<String, Bytes>;
 
@@ -35,40 +37,14 @@ pub fn parse_interaction_field(offsets: &U256, interactions: &Bytes, field: u8) 
     return Bytes::from(interaction.to_owned());
 }
 
-fn maskn(n: &U256, bits: usize) -> U256 {
-    let mut n = n.to_owned();
-    assert!(n >= U256::from(0), "maskn works only with positive numbers");
-
-    let r = bits % 26;
-    let s = (bits - r) / 26;
-
-    let n_len = n.bits();
-    if n_len <= s {
-        return n.to_owned();
-    }
-
-    let s = if r != 0 { s + 1 } else { s };
-
-    n = n & ((U256::from(1) << (26 * s)) - 1);
-
-    if r != 0 {
-        let mask = 0x3ffffff ^ ((0x3ffffff >> r) << r);
-        let last_word = n >> (26 * (s - 1));
-        let new_last_word = last_word & U256::from(mask);
-        n = n - ((last_word - new_last_word) << (26 * (s - 1)));
-    }
-
-    n
-}
-
 pub fn get_offset_for_interaction(offsets: &U256, field: u8) -> (usize, usize) {
     let from_byte = if field == 0 {
         U256::from(0)
     } else {
-        maskn(&(offsets >> ((field - 1) * 32)), 32)
+        (offsets >> ((field - 1) * 32)).maskn(32)
     };
 
-    let to_byte = maskn(&(offsets >> (field * 32)), 32);
+    let to_byte = (offsets >> (field * 32)).maskn(32);
 
     return (from_byte.as_usize(), to_byte.as_usize());
 }

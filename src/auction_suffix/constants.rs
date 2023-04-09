@@ -1,1 +1,5 @@
-pub const NO_PUBLIC_RESOLVING_DEADLINE: u64 = 4102444800000;
+use ethers::types::U256;
+
+pub fn no_public_resolving_deadline() -> U256 {
+    U256::from(4102444800 as u64)
+}

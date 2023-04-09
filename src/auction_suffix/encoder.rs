@@ -1,6 +1,9 @@
 use std::borrow::Borrow;
 
-use ethers::{abi::AbiEncode, types::U256};
+use ethers::{
+    abi::AbiEncode,
+    types::{Address, U256},
+};
 
 use crate::{
     constants::{zero_number, ZERO_ADDRESS},
@@ -22,16 +25,16 @@ pub fn encode_auction_params(points: &Vec<AuctionPoint>) -> String {
 pub fn encode_whitelist(whitelist: &Vec<AuctionWhitelistItem>) -> String {
     whitelist
         .iter()
-        .map(|w| w.allowance.encode_hex().pad_start(8, '0') + trim_0x(&w.address))
+        .map(|w| w.allowance.encode_hex().pad_start(8, '0') + &trim_0x(&format!("{:?}", w.address)))
         .collect()
 }
 
-pub fn encode_public_resolving_deadline(deadline: u64) -> String {
+pub fn encode_public_resolving_deadline(deadline: U256) -> String {
     deadline.encode_hex().pad_start(8, '0')
 }
 
-pub fn encode_taking_fee_data(taker_fee_receiver: &str, taker_fee_ratio: &U256) -> String {
-    if taker_fee_receiver == ZERO_ADDRESS || taker_fee_ratio == &zero_number() {
+pub fn encode_taking_fee_data(taker_fee_receiver: &Address, taker_fee_ratio: &U256) -> String {
+    if taker_fee_receiver == &ZERO_ADDRESS || taker_fee_ratio == &zero_number() {
         return "".to_string();
     }
 
@@ -39,7 +42,7 @@ pub fn encode_taking_fee_data(taker_fee_receiver: &str, taker_fee_ratio: &U256) 
     taker_fee_ratio_hex
         .substring(2, taker_fee_ratio_hex.len())
         .pad_start(24, '0')
-        + trim_0x(&taker_fee_receiver)
+        + trim_0x(&taker_fee_receiver.encode_hex())
 }
 
 pub fn encode_flags(

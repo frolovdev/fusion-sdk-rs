@@ -1,5 +1,7 @@
 use std::ops::Add;
 
+use ethers::types::U256;
+
 use crate::constants::{NATIVE_CURRENCY, ZX};
 
 pub fn is_native_currency(address: &str) -> bool {
@@ -97,13 +99,28 @@ where
     y
 }
 
+pub trait Maskn {
+    // Return only lowers bits of number (in-place)
+    fn maskn(&self, bits: usize) -> Self;
+}
+
+impl Maskn for U256 {
+    fn maskn(&self, bits: usize) -> Self {
+        if self.bits() <= bits {
+            return self.to_owned();
+        }
+
+        let num = self.to_owned();
+        let mask = U256::from((U256::from(1) << U256::from(bits)) - U256::from(1)); // create a mask of the lower `bits` bits
+        num & mask
+    }
+}
+
 #[cfg(test)]
 mod tests {
-
-    use pretty_assertions::assert_eq;
-
     mod pad_start {
         use super::super::PadStart;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn test_pad_start_no_padding_needed() {
@@ -136,6 +153,7 @@ mod tests {
 
     mod substring {
         use super::super::Substring;
+        use pretty_assertions::assert_eq;
         #[test]
         fn test_substring() {
             assert_eq!("foobar".substring(0, 3), "foo");
@@ -165,6 +183,7 @@ mod tests {
 
     mod cumsum {
         use super::super::cumsum;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn test_cumsum() {
@@ -185,6 +204,31 @@ mod tests {
             let y: Vec<i32> = cumsum(&x);
 
             assert_eq!(y, x);
+        }
+    }
+
+    mod maskn {
+        use ethers::types::U256;
+        use pretty_assertions::assert_eq;
+
+        use super::super::Maskn;
+
+        #[test]
+        fn should_mask_bits_in_place() {
+            assert_eq!(U256::from(0).maskn(1), U256::from(0));
+            assert_eq!(U256::from(3).maskn(1), U256::from(1));
+            assert_eq!(U256::from(4886718345 as u64).maskn(4), U256::from(9));
+            assert_eq!(U256::from(4886718345 as u64).maskn(16), U256::from(26505));
+            assert_eq!(
+                U256::from(4886718345 as u64).maskn(28),
+                U256::from(54880137)
+            );
+        }
+
+        #[test]
+        fn should_not_mask_when_number_is_bigger_than_length() {
+            assert_eq!(U256::from(0xe3).maskn(56), U256::from(0xe3));
+            assert_eq!(U256::from(0xe3).maskn(26), U256::from(0xe3));
         }
     }
 }
