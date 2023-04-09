@@ -3,7 +3,7 @@ use ethers::types::{Address, Bytes, U256};
 #[derive(Debug)]
 pub struct AuctionWhitelistItem {
     pub address: Address,
-    pub allowance: u32, //
+    pub allowance: u32, // unix timestamp
 }
 
 #[derive(Debug)]
@@ -15,7 +15,7 @@ pub struct ResolverWhitelist {
 #[derive(Debug)]
 pub struct InteractionAdditionalInfo {
     pub whitelist: Vec<AuctionWhitelistItem>,
-    pub public_resolving_deadline: U256, // unix timestamp (u16)
+    pub public_resolving_deadline: u32, // unix timestamp
     pub taker_fee_receiver: Address,
     pub taker_fee_ratio: U256,
     pub points: Vec<AuctionPoint>,
@@ -37,14 +37,14 @@ pub struct TakerFeeData {
 
 #[derive(Debug)]
 pub struct PrivateAuctionDeadline {
-    pub deadline: U256, // unix timestamp (u16)
+    pub deadline: u32, // unix timestamp
     pub interactions: Bytes,
 }
 
 #[derive(Debug)]
 pub struct AuctionPoint {
-    pub delay: u16,       // seconds
-    pub coefficient: u32, // 1 >> 24
+    pub delay: u16, // seconds
+    pub coefficient: u32,
 }
 
 #[derive(Debug)]

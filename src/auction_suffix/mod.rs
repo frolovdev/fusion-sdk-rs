@@ -10,7 +10,7 @@ use crate::{
     },
     constants::{zero_number, ZERO_ADDRESS},
 };
-use ethers::types::Bytes;
+use ethers::types::{Bytes, U256};
 use parser::parse_interactions_suffix;
 use types::{AuctionSuffix, SettlementSuffixData, TakingFee};
 
@@ -21,9 +21,11 @@ impl AuctionSuffix {
         AuctionSuffix {
             points: suffix.points,
             whitelist: suffix.whitelist,
-            public_resolving_deadline: suffix
-                .public_resolving_deadline
-                .unwrap_or_else(|| no_public_resolving_deadline()),
+            public_resolving_deadline: U256::from(
+                suffix
+                    .public_resolving_deadline
+                    .unwrap_or_else(|| no_public_resolving_deadline()),
+            ),
             taker_fee_receiver: suffix
                 .fee
                 .as_ref()
@@ -72,7 +74,7 @@ mod tests {
     use crate::auction_suffix::parser::types::{AuctionPoint, AuctionWhitelistItem};
 
     use super::{AuctionSuffix, SettlementSuffixData};
-    use ethers::types::{Address, Bytes, U256};
+    use ethers::types::{Address, Bytes};
     use pretty_assertions::assert_eq;
     #[test]
     fn should_create_suffix_with_required_params() {
@@ -106,7 +108,7 @@ mod tests {
                 address: Address::from_str("0x00000000219ab540356cbb839cbe05303d7705fa").unwrap(),
                 allowance: 0,
             }],
-            public_resolving_deadline: Some(U256::from(1673549418)),
+            public_resolving_deadline: Some(1673549418),
             fee: None,
         });
 

@@ -22,6 +22,6 @@ pub struct TakingFee {
 pub struct SettlementSuffixData {
     pub points: Vec<AuctionPoint>,
     pub whitelist: Vec<AuctionWhitelistItem>,
-    pub public_resolving_deadline: Option<U256>,
+    pub public_resolving_deadline: Option<u32>,
     pub fee: Option<TakingFee>,
 }

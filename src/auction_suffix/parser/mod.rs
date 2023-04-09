@@ -94,7 +94,9 @@ pub fn parse_private_auction_deadline(interactions: &[u8]) -> PrivateAuctionDead
     let private_auction_deadline_bytes =
         &interactions[interactions.len() - PRIVATE_AUCTION_DEADLINE_LENGTH..interactions.len()];
 
-    let private_auction_deadline = U256::from(private_auction_deadline_bytes);
+    let private_auction_deadline: u32 = U256::from(private_auction_deadline_bytes)
+        .try_into()
+        .unwrap();
 
     PrivateAuctionDeadline {
         deadline: private_auction_deadline,

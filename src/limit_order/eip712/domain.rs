@@ -1,5 +1,5 @@
 use ethers::types::transaction::eip712::Eip712DomainType;
-use serde_json::{json};
+use serde_json::json;
 
 pub fn eip712_domain_type() -> Vec<Eip712DomainType> {
     let eip712_domain_type_json = json!([
