@@ -13,7 +13,6 @@ use types::*;
 pub fn parse_interactions_suffix(interactions: &Bytes) -> InteractionAdditionalInfo {
     let flags = parse_flags(interactions);
 
-    println!("flags: {:?}", flags);
     if interactions.len() < min_interactions_length(&flags) {
         panic!("Wrong interactions length")
     }
@@ -26,20 +25,10 @@ pub fn parse_interactions_suffix(interactions: &Bytes) -> InteractionAdditionalI
         interactions: interactions_no_taking_fee,
     } = parse_taking_fee_and_return_remaining_interactions(&flags, interactions_without_flags);
 
-    println!("taker_fee_receiver: {:?}", taker_fee_receiver);
-    println!("taker_fee_ratio: {}", taker_fee_ratio);
-    println!(
-        "interactions_no_taking_fee: {:?}",
-        &interactions_no_taking_fee
-    );
-
     let PrivateAuctionDeadline {
         deadline,
         interactions: interactions_no_deadline,
     } = parse_private_auction_deadline(&interactions_no_taking_fee);
-
-    println!("deadline: {}", deadline);
-    println!("interactions_no_deadline: {:?}", &interactions_no_deadline);
 
     let ResolverWhitelist {
         whitelist,
@@ -106,8 +95,6 @@ pub fn parse_private_auction_deadline(interactions: &[u8]) -> PrivateAuctionDead
         &interactions[interactions.len() - PRIVATE_AUCTION_DEADLINE_LENGTH..interactions.len()];
 
     let private_auction_deadline = U256::from(private_auction_deadline_bytes);
-
-    println!("private_auction_deadline: {:?}", &private_auction_deadline);
 
     PrivateAuctionDeadline {
         deadline: private_auction_deadline,
