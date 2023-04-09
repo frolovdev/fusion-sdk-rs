@@ -71,10 +71,13 @@ mod tests {
 
     use std::str::FromStr;
 
-    use crate::auction_suffix::parser::types::{AuctionPoint, AuctionWhitelistItem};
+    use crate::auction_suffix::{
+        parser::types::{AuctionPoint, AuctionWhitelistItem},
+        types::TakingFee,
+    };
 
     use super::{AuctionSuffix, SettlementSuffixData};
-    use ethers::types::{Address, Bytes};
+    use ethers::types::{Address, Bytes, U256};
     use pretty_assertions::assert_eq;
     #[test]
     fn should_create_suffix_with_required_params() {
@@ -119,6 +122,33 @@ mod tests {
     }
 
     #[test]
+    fn should_create_suffix_with_specified_taker_fee() {
+        let suffix = AuctionSuffix::new(SettlementSuffixData {
+            points: vec![AuctionPoint {
+                coefficient: 20000,
+                delay: 12,
+            }],
+            whitelist: vec![AuctionWhitelistItem {
+                address: Address::from_str("0x00000000219ab540356cbb839cbe05303d7705fa").unwrap(),
+                allowance: 0,
+            }],
+            public_resolving_deadline: Some(1673549418),
+            fee: Some(TakingFee {
+                taking_fee_receiver: Address::from_str(
+                    "0x00000000219ab540356cbb839cbe05303d7705fa",
+                )
+                .unwrap(),
+                taking_fee_ratio: U256::from(100),
+            }),
+        });
+
+        assert_eq!(
+            suffix.build(),
+            "000c004e200000000000000000219ab540356cbb839cbe05303d7705fa63c0566a00000000000000000000006400000000219ab540356cbb839cbe05303d7705fa89"
+        );
+    }
+
+    #[test]
     fn should_decode_auction_suffix() {
         let encoded_suffix =
             Bytes::from_str("000c004e200000000000000000219ab540356cbb839cbe05303d7705fa63c0566a09")
@@ -129,6 +159,20 @@ mod tests {
         assert_eq!(
             suffix.build(),
             "000c004e200000000000000000219ab540356cbb839cbe05303d7705fa63c0566a09"
+        );
+    }
+
+    #[test]
+    fn should_decode_auction_suffix_with_taker() {
+        let encoded_suffix =
+            Bytes::from_str(&"000c004e200000000000000000219ab540356cbb839cbe05303d7705fa63c0566a00000000000000000000006400000000219ab540356cbb839cbe05303d7705fa89")
+                .unwrap();
+
+        let suffix = AuctionSuffix::decode(&encoded_suffix);
+
+        assert_eq!(
+            suffix.build(),
+            "000c004e200000000000000000219ab540356cbb839cbe05303d7705fa63c0566a00000000000000000000006400000000219ab540356cbb839cbe05303d7705fa89"
         );
     }
 }

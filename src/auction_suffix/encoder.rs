@@ -42,7 +42,7 @@ pub fn encode_taking_fee_data(taker_fee_receiver: &Address, taker_fee_ratio: &U2
     taker_fee_ratio_hex
         .substring(2, taker_fee_ratio_hex.len())
         .pad_start(24, '0')
-        + trim_0x(&taker_fee_receiver.encode_hex())
+        + &trim_0x(&format!("{:?}", taker_fee_receiver))
 }
 
 pub fn encode_flags(
