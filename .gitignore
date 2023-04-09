@@ -1,1 +1,3 @@
 /target
+build_rs_cov.*
+tarpaulin-report.*
