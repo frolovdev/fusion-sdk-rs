@@ -34,7 +34,7 @@ impl AuctionSalt {
         }
     }
 
-    pub fn decode(salt: &str) -> Self {
+    pub fn decode(salt: &U256) -> Self {
         Self {
             salt: get_salt(salt),
             auction_start_time: get_start_time(salt).try_into().unwrap(),
@@ -157,9 +157,9 @@ mod tests {
     #[test]
     fn should_decode_salt() {
         let encoded_salt =
-            "45118768841948961586167741099429671146420854337050268925130474518618971309032";
+            U256::from_dec_str("45118768841948961586167741099429671146420854337050268925130474518618971309032").unwrap();
 
-        let salt = AuctionSalt::decode(encoded_salt);
+        let salt = AuctionSalt::decode(&encoded_salt);
 
         assert_eq!(salt.build(), encoded_salt.to_string());
     }
