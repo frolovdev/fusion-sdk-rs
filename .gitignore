@@ -1,3 +1,4 @@
 /target
 build_rs_cov.*
 tarpaulin-report.*
+private-todo.md
