@@ -1,6 +1,6 @@
 use ethers::types::U256;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AuctionSalt {
     pub auction_start_time: u64,
     pub initial_rate_bump: u32,
@@ -9,7 +9,7 @@ pub struct AuctionSalt {
     pub salt: U256,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AuctionSaltData {
     pub auction_start_time: u64,
     pub initial_rate_bump: u32,

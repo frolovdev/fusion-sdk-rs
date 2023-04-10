@@ -3,7 +3,7 @@ use serde_json::json;
 use std::collections::BTreeMap;
 use struct_field_names_as_array::FieldNamesAsArray;
 
-#[derive(FieldNamesAsArray, Debug, PartialEq)]
+#[derive(FieldNamesAsArray, Debug, Clone, PartialEq)]
 pub struct LimitOrderV3Struct {
     pub salt: U256,
     pub maker_asset: Address,

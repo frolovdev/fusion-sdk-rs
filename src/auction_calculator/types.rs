@@ -2,10 +2,11 @@ use ethers::types::U256;
 
 use crate::auction_suffix::parser::types::AuctionPoint;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct AuctionCalculator {
-    start_time: u64,
-    duration: u32,
-    initial_rate_bump: u32,
-    points: Vec<AuctionPoint>,
-    taker_fee_ratio: U256,
+    pub start_time: u64,
+    pub duration: u32,
+    pub initial_rate_bump: u32,
+    pub points: Vec<AuctionPoint>,
+    pub taker_fee_ratio: U256,
 }

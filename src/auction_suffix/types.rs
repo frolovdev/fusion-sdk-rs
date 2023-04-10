@@ -3,7 +3,7 @@ use ethers::types::U256;
 
 use super::parser::types::AuctionPoint;
 use super::parser::types::AuctionWhitelistItem;
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AuctionSuffix {
     pub points: Vec<AuctionPoint>,
     pub whitelist: Vec<AuctionWhitelistItem>,
@@ -12,13 +12,13 @@ pub struct AuctionSuffix {
     pub taker_fee_ratio: U256,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TakingFee {
     pub taking_fee_ratio: U256,
     pub taking_fee_receiver: Address,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SettlementSuffixData {
     pub points: Vec<AuctionPoint>,
     pub whitelist: Vec<AuctionWhitelistItem>,
