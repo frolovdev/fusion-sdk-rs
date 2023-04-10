@@ -15,8 +15,7 @@ pub fn get_duration(salt: &U256) -> U256 {
 }
 
 pub fn get_initial_rate_bump(salt: &U256) -> U256 {
-    let val =
-        (salt.to_owned() & initial_rate_bump_mask()) >> U256::from(INITIAL_RATE_BUMP_SHIFT);
+    let val = (salt.to_owned() & initial_rate_bump_mask()) >> U256::from(INITIAL_RATE_BUMP_SHIFT);
     val
 }
 

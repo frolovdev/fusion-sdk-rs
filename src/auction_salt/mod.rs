@@ -156,8 +156,10 @@ mod tests {
 
     #[test]
     fn should_decode_salt() {
-        let encoded_salt =
-            U256::from_dec_str("45118768841948961586167741099429671146420854337050268925130474518618971309032").unwrap();
+        let encoded_salt = U256::from_dec_str(
+            "45118768841948961586167741099429671146420854337050268925130474518618971309032",
+        )
+        .unwrap();
 
         let salt = AuctionSalt::decode(&encoded_salt);
 
