@@ -6,7 +6,7 @@ use chrono::Utc;
 use ethers::abi::Hash;
 use ethers::types::{Signature, U256};
 use futures_util::{Future, StreamExt};
-use serde_json::{Value};
+use serde_json::Value;
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 use url::Url;
 
@@ -35,7 +35,6 @@ impl WebSocketApi {
     pub fn new(config: &WebSocketApiConfig) -> Self {
         let config_url_with_network = format!("{}/{}/{}", &config.url, "v1.0", &config.network);
 
-        println!("config_url_with_network: {}", config_url_with_network);
         let url: Url = Url::parse(&config_url_with_network).expect("Invalid WebSocket URL");
 
         Self {
@@ -123,39 +122,33 @@ fn parse_text_message(text: &str) -> RpcMessage {
 
     let event_type = value.get("event").expect("No event type found");
 
-    print!("event_type: {}", text);
-
     let msg_parsed = match event_type.as_str().unwrap() {
         "order_created" => {
-            let result = value.get("result");
+            let result = value.get("result").expect("No result found");
 
-            let hash = result
-                .and_then(|v| v.get("orderHash"))
-                .expect("No hash found");
-            let signature = result
-                .and_then(|v| v.get("signature"))
-                .expect("No signature found");
+            let hash = result.get("orderHash").expect("No hash found");
+            let signature = result.get("signature").expect("No signature found");
 
-            let deadline = result
-                .and_then(|v| v.get("deadline"))
-                .expect("No deadline found");
+            let deadline = result.get("deadline").expect("No deadline found");
 
             let auction_start_date = result
-                .and_then(|v| v.get("auctionStartDate"))
+                .get("auctionStartDate")
                 .expect("No auction_start_date found");
 
             let auction_end_date = result
-                .and_then(|v| v.get("auctionEndDate"))
+                .get("auctionEndDate")
                 .expect("No auction_end_date found");
 
             let remaining_maker_amount = result
-                .and_then(|v| v.get("remainingMakerAmount"))
+                .get("remainingMakerAmount")
                 .expect("No remaining_maker_amount found");
+
+            let order = result.get("order").expect("No order found");
 
             RpcMessage::OrderEvent(OrderEvent::Created(OrderEventCreated {
                 order_hash: Hash::from_str(hash.as_str().unwrap()).unwrap(),
                 signature: Signature::from_str(signature.as_str().unwrap()).unwrap(),
-                order: LimitOrderV3Struct::from_json(result.and_then(|v| v.get("order")).unwrap()),
+                order: LimitOrderV3Struct::from_json(order),
                 deadline: chrono::DateTime::<Utc>::from_str(deadline.as_str().unwrap())
                     .unwrap()
                     .timestamp() as u32,
@@ -186,33 +179,14 @@ fn parse_text_message(text: &str) -> RpcMessage {
         // "order_balance_or_allowance_change" => {
         //     let result = value.get("result");
         // }
-        // "Filled" => {
+        // "filled" => {
         //     println!("Filled");
         // }
-        // "FilledPartially" => {
+        // "filled_partially" => {
         //     println!("FilledPartially");
         // }
         _ => RpcMessage::None,
     };
 
     msg_parsed
-    //     "Created" => {
-    //         println!("Created");
-    //     }
-    //     "Invalid" => {
-    //         println!("Invalid");
-    //     }
-    //     "BalanceOrAllowanceChange" => {
-    //         println!("BalanceOrAllowanceChange");
-    //     }
-    //     "Filled" => {
-    //         println!("Filled");
-    //     }
-    //     "FilledPartially" => {
-    //         println!("FilledPartially");
-    //     }
-    //     _ => {
-    //         println!("Unknown message");
-    //     }
-    // };
 }
