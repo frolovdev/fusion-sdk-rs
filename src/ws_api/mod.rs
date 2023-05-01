@@ -17,7 +17,6 @@ use self::types::{OrderEvent, OrderEventCreated, RpcMessage};
 
 pub struct WebSocketApi {
     url: Url,
-
     subscribers: Vec<FutureOrValue>,
 }
 
@@ -64,8 +63,8 @@ impl WebSocketApi {
 
             for subscriber in self.subscribers.iter() {
                 match subscriber {
-                    FutureOrValue::Future(futureFn) => futureFn(msg_parsed.clone()).await,
-                    FutureOrValue::Value(valueFn) => valueFn(msg_parsed.clone()),
+                    FutureOrValue::Future(r#fn) => r#fn(msg_parsed.clone()).await,
+                    FutureOrValue::Value(r#fn) => r#fn(msg_parsed.clone()),
                 }
             }
         }
