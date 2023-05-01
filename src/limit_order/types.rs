@@ -1,6 +1,6 @@
 use ethers::types::{Address, Bytes, U256};
-use serde_json::json;
-use std::collections::BTreeMap;
+use serde_json::{json, Value};
+use std::{collections::BTreeMap, str::FromStr};
 use struct_field_names_as_array::FieldNamesAsArray;
 
 #[derive(FieldNamesAsArray, Debug, Clone, PartialEq)]
@@ -15,6 +15,55 @@ pub struct LimitOrderV3Struct {
     pub taking_amount: U256,
     pub offsets: U256,
     pub interactions: Bytes,
+}
+
+impl LimitOrderV3Struct {
+    pub fn from_json(json: &Value) -> Self {
+        let json_map = json.as_object().unwrap();
+
+        let salt = json_map.get("salt").unwrap().as_str().unwrap();
+        let salt = U256::from_dec_str(salt).unwrap();
+
+        let maker_asset = json_map.get("makerAsset").unwrap().as_str().unwrap();
+        let maker_asset = Address::from_str(maker_asset).unwrap();
+
+        let taker_asset = json_map.get("takerAsset").unwrap().as_str().unwrap();
+        let taker_asset = Address::from_str(taker_asset).unwrap();
+
+        let maker = json_map.get("maker").unwrap().as_str().unwrap();
+        let maker = Address::from_str(maker).unwrap();
+
+        let receiver = json_map.get("receiver").unwrap().as_str().unwrap();
+        let receiver = Address::from_str(receiver).unwrap();
+
+        let allowed_sender = json_map.get("allowedSender").unwrap().as_str().unwrap();
+        let allowed_sender = Address::from_str(allowed_sender).unwrap();
+
+        let making_amount = json_map.get("makingAmount").unwrap().as_str().unwrap();
+        let making_amount = U256::from_dec_str(making_amount).unwrap();
+
+        let taking_amount = json_map.get("takingAmount").unwrap().as_str().unwrap();
+        let taking_amount = U256::from_dec_str(taking_amount).unwrap();
+
+        let offsets = json_map.get("offsets").unwrap().as_str().unwrap();
+        let offsets = U256::from_dec_str(offsets).unwrap();
+
+        let interactions = json_map.get("interactions").unwrap().as_str().unwrap();
+        let interactions = Bytes::from_str(interactions).unwrap();
+
+        Self {
+            salt,
+            maker_asset,
+            taker_asset,
+            maker,
+            receiver,
+            allowed_sender,
+            making_amount,
+            taking_amount,
+            offsets,
+            interactions,
+        }
+    }
 }
 
 pub trait ToBtreeMap {

@@ -1,4 +1,5 @@
 use ethers::types::{Address, U256};
+use strum_macros::Display;
 
 pub const NATIVE_CURRENCY: &str = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 pub const ZERO_ADDRESS: Address = Address::zero();
@@ -8,10 +9,13 @@ pub fn zero_number() -> U256 {
 
 pub const ZX: &str = "0x";
 
-#[derive(Debug)]
+#[derive(Debug, Display)]
 pub enum NetworkEnum {
+    #[strum(serialize = "1")]
     ETHEREUM = 1,
+    #[strum(serialize = "137")]
     POLYGON = 137,
+    #[strum(serialize = "56")]
     BINANCE = 56,
 }
 
