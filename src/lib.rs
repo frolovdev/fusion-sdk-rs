@@ -5,3 +5,4 @@ pub mod constants;
 pub mod limit_order;
 pub mod salt;
 pub mod utils;
+pub mod ws_api;
