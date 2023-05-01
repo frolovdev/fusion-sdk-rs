@@ -8,7 +8,8 @@ use crate::limit_order::types::LimitOrderV3Struct;
 #[derive(Debug, Clone, PartialEq)]
 pub enum RpcMessage {
     OrderEvent(OrderEvent),
-    // SystemEvent(None),
+    SystemEvent(SystemEvent),
+    ActiveOrdersEvent(ActiveOrdersEvent),
     None,
 }
 
@@ -32,6 +33,22 @@ pub enum OrderEvent {
         remaining_maker_amount: U256,
     },
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum SystemEvent {
+    PingEvent(String),
+    GetAllowMethodsEvent(AllowedMethods),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum AllowedMethods {
+    GetAllowedMethods,
+    GetActiveOrders,
+    Ping,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ActiveOrdersEvent {}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OrderEventCreated {
