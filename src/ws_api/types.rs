@@ -1,6 +1,6 @@
 use ethers::{
     abi::Hash,
-    types::{Signature, H64, U256},
+    types::{Signature, U256},
 };
 
 use crate::limit_order::types::LimitOrderV3Struct;
@@ -19,7 +19,7 @@ pub enum OrderEvent {
         order_hash: Hash,
     },
     BalanceOrAllowanceChange {
-        orderHash: Hash,
+        order_hash: Hash,
         remaining_maker_amount: U256,
         balance: U256,
         allowance: u32,

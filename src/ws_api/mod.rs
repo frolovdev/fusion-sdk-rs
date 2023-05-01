@@ -54,7 +54,7 @@ impl WebSocketApi {
 
             let msg_parsed = match msg {
                 Message::Text(text) => parse_text_message(&text),
-                Message::Binary(bin) => panic!("Received binary message"),
+                Message::Binary(_) => panic!("Received binary message"),
                 _ => {
                     println!("Received unknown message");
                     continue;

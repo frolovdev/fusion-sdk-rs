@@ -1,5 +1,4 @@
 use ethers::types::{Address, U256};
-use strum::EnumString;
 use strum_macros::Display;
 
 pub const NATIVE_CURRENCY: &str = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
